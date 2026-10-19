@@ -1,0 +1,18 @@
+export const ANNOUNCEMENT_CATEGORIES = ['Construction Update', 'Road Closure', 'Pedestrian Access', 'Traffic Advisory', 'Community Notice'];
+export const FEEDBACK_CATEGORIES = ['Noise & Vibration', 'Traffic & Road Access', 'Dust & Air Quality', 'Pedestrian Safety', 'Business Access', 'Other'];
+export const FEEDBACK_STATUSES = ['Submitted', 'Under Review', 'In Progress', 'Resolved'];
+export const INITIAL_ANNOUNCEMENTS = [
+  {id:'ann-101',title:'Preparatory Works at Komtar Corridor',description:'Site preparation and temporary safety barriers are planned along selected sections of the corridor. Please follow posted signs and instructions from site personnel. This is a sample announcement for portal demonstration only.',date:'2026-10-23',endDate:'2026-11-06',location:'Komtar, George Town',category:'Construction Update',featured:true},
+  {id:'ann-102',title:'Temporary Lane Adjustment Near Sungai Nibong',description:'A temporary adjustment to traffic lanes is shown here as an example of how road closure notices can be communicated. Refer to official project notices for verified traffic arrangements.',date:'2026-10-26',endDate:'2026-10-30',location:'Sungai Nibong',category:'Road Closure',featured:false},
+  {id:'ann-103',title:'Alternative Walking Route Information',description:'Pedestrian signage and alternative routes may be introduced near active work zones. Check on-site signs for up-to-date access information. This entry is illustrative.',date:'2026-10-28',endDate:'2026-11-12',location:'Bayan Lepas',category:'Pedestrian Access',featured:false},
+  {id:'ann-104',title:'Community Construction Information Session',description:'An illustrative community information session announcement. Administrators can replace this sample with confirmed details before public use.',date:'2026-11-04',endDate:'2026-11-04',location:'Gelugor',category:'Community Notice',featured:false}
+];
+export const INITIAL_FEEDBACK = [
+  {id:'FB-2026-001',name:'Demo Resident',email:'resident@example.com',category:'Noise & Vibration',location:'Komtar, George Town',description:'Sample feedback: construction noise during the evening near my residence.',status:'Under Review',createdAt:'2026-10-15T10:20:00.000Z',updatedAt:'2026-10-16T10:20:00.000Z',adminNote:'Sample record for demonstration only.'},
+  {id:'FB-2026-002',name:'Demo Business Owner',email:'business@example.com',category:'Business Access',location:'Sungai Nibong',description:'Sample feedback: customers are unsure which entrance remains accessible.',status:'In Progress',createdAt:'2026-10-16T07:15:00.000Z',updatedAt:'2026-10-17T07:15:00.000Z',adminNote:'Sample record for demonstration only.'}
+];
+export function readStored(key, fallback){try{const raw=window.localStorage.getItem(key);const parsed=raw?JSON.parse(raw):fallback;return Array.isArray(parsed)?parsed:fallback;}catch{return fallback;}}
+export function formatDate(value){if(!value)return '—';const d=new Date(value.length===10?`${value}T00:00:00`:value);return Number.isNaN(d.getTime())?'—':d.toLocaleDateString('en-MY',{day:'numeric',month:'short',year:'numeric'});}
+export function makeId(prefix='id'){return `${prefix}-${globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`}`;}
+export const categoryStyles = {'Construction Update':'bg-sky-50 text-sky-700','Road Closure':'bg-amber-50 text-amber-700','Pedestrian Access':'bg-emerald-50 text-emerald-700','Traffic Advisory':'bg-violet-50 text-violet-700','Community Notice':'bg-slate-100 text-slate-700'};
+export const statusStyles={'Submitted':'bg-slate-100 text-slate-700','Under Review':'bg-amber-50 text-amber-700','In Progress':'bg-blue-50 text-blue-700','Resolved':'bg-emerald-50 text-emerald-700'};

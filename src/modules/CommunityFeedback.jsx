@@ -1,0 +1,10 @@
+import React, {useEffect, useMemo, useState} from 'react';
+import {TrainFront, Menu, X, ArrowRight, ArrowUpRight, Megaphone, MessageSquareText, ClipboardList, MapPin, CalendarDays, Search, SlidersHorizontal, Plus, Pencil, Trash2, Eye, Clock3, CheckCircle2, AlertTriangle, ChevronRight, ShieldCheck, LayoutDashboard, Inbox, Send, CircleHelp, Construction, Route, Users, Filter, RefreshCw, Copy, ExternalLink} from 'lucide-react';
+import {ANNOUNCEMENT_CATEGORIES, FEEDBACK_CATEGORIES, FEEDBACK_STATUSES, INITIAL_ANNOUNCEMENTS, INITIAL_FEEDBACK, readStored, formatDate, makeId, categoryStyles, statusStyles} from '../lib/data.js';
+import {CategoryPill, StatusPill, Empty, SectionHead, AnnouncementCard, Modal, AnnouncementDetails, Field, AnnouncementForm, FeedbackForm, FeedbackDetails} from '../components/Common.jsx';
+
+export default function CommunityFeedback({addFeedback}){
+return (
+<section className="mx-auto max-w-5xl px-5 py-12 lg:px-8"><SectionHead eyebrow="We want to hear from you" title="Submit community feedback" description="Tell us about disruption or access issues you have experienced near the construction area."/><div className="grid items-start gap-7 lg:grid-cols-[1fr_300px]"><FeedbackForm onSubmit={addFeedback}/><aside className="space-y-5"><div className="rounded-2xl bg-navy p-6 text-white"><MessageSquareText size={28} className="text-[#77dfc8]"/><h3 className="mt-4 text-lg font-extrabold">Your feedback matters</h3><p className="mt-3 text-sm leading-7 text-slate-300">Share a clear location, select the most relevant category and explain the issue. The demo administrator can update its status.</p></div><div className="panel p-6"><h3 className="font-extrabold">What happens next?</h3><div className="mt-5 space-y-5">{[['01','Submit your report'],['02','Receive a tracking reference'],['03','Check for status updates']].map(([num,label])=><div className="flex items-center gap-3 text-sm" key={num}><span className="rounded-lg bg-mint px-3 py-2 font-extrabold text-teal">{num}</span><span className="font-semibold">{label}</span></div>)}</div></div></aside></div></section>
+);
+}
