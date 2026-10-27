@@ -13,7 +13,10 @@ import {
   ShieldCheck,
 } from "lucide-react";
 
-// Data and utility functions
+// =====================================================
+// DATA AND UTILITY FUNCTIONS
+// =====================================================
+
 import {
   INITIAL_ANNOUNCEMENTS,
   INITIAL_FEEDBACK,
@@ -21,7 +24,10 @@ import {
   makeId,
 } from "./lib/data.js";
 
-// Shared reusable components
+// =====================================================
+// SHARED COMPONENTS
+// =====================================================
+
 import {
   AnnouncementDetails,
   FeedbackDetails,
@@ -29,17 +35,22 @@ import {
   AnnouncementForm,
 } from "./components/Common.jsx";
 
-// Main pages
+// =====================================================
+// MAIN PAGES
+// =====================================================
+
 import Home from "./pages/Home.jsx";
 import Dashboard from "./pages/Dashboard.jsx";
 
-// Module components
+// =====================================================
+// MODULE COMPONENTS
+// =====================================================
+
 import ConstructionAnnouncements from "./modules/ConstructionAnnouncements.jsx";
 import CommunityFeedback from "./modules/CommunityFeedback.jsx";
 import FeedbackTracking from "./modules/FeedbackTracking.jsx";
 import AnnouncementManagement from "./modules/AnnouncementManagement.jsx";
 import FeedbackManagement from "./modules/FeedbackManagement.jsx";
-
 
 // =====================================================
 // LOCAL STORAGE KEYS
@@ -48,6 +59,34 @@ import FeedbackManagement from "./modules/FeedbackManagement.jsx";
 const ANNOUNCEMENT_KEY = "mutiara-announcements-v1";
 const FEEDBACK_KEY = "mutiara-feedback-v1";
 
+// =====================================================
+// GENERATE FEEDBACK TRACKING REFERENCE
+// =====================================================
+
+function generateTrackingId(date) {
+
+  // Get submission date in YYYYMMDD format
+  const year = date.getFullYear();
+
+  const month = String(
+    date.getMonth() + 1
+  ).padStart(2, "0");
+
+  const day = String(
+    date.getDate()
+  ).padStart(2, "0");
+
+  const dateCode = `${year}${month}${day}`;
+
+  // Generate a random identifier
+  const uniqueCode = crypto.randomUUID()
+    .replace(/-/g, "")
+    .slice(0, 8)
+    .toUpperCase();
+
+  // Example: FB-20261027-A4F92C18
+  return `FB-${dateCode}-${uniqueCode}`;
+}
 
 // =====================================================
 // MAIN APPLICATION
@@ -55,24 +94,21 @@ const FEEDBACK_KEY = "mutiara-feedback-v1";
 
 function App() {
 
-  // ---------------------------------------------------
+  // =====================================================
   // 1. DATA STATE
-  // ---------------------------------------------------
+  // =====================================================
 
-  // Store construction announcements
   const [announcements, setAnnouncements] = useState(() =>
     readStored(ANNOUNCEMENT_KEY, INITIAL_ANNOUNCEMENTS)
   );
 
-  // Store community feedback
   const [feedback, setFeedback] = useState(() =>
     readStored(FEEDBACK_KEY, INITIAL_FEEDBACK)
   );
 
-
-  // ---------------------------------------------------
+  // =====================================================
   // 2. NAVIGATION STATE
-  // ---------------------------------------------------
+  // =====================================================
 
   const [tab, setTab] = useState("home");
 
@@ -80,10 +116,9 @@ function App() {
 
   const [mobileMenu, setMobileMenu] = useState(false);
 
-
-  // ---------------------------------------------------
+  // =====================================================
   // 3. MODAL STATE
-  // ---------------------------------------------------
+  // =====================================================
 
   const [selectedAnnouncement, setSelectedAnnouncement] =
     useState(null);
@@ -91,17 +126,16 @@ function App() {
   const [selectedFeedback, setSelectedFeedback] =
     useState(null);
 
-  // undefined = closed
+  // undefined = form closed
   // null = create announcement
   // object = edit announcement
   const [editing, setEditing] = useState(undefined);
 
   const [deleteTarget, setDeleteTarget] = useState(null);
 
-
-  // ---------------------------------------------------
-  // 4. ANNOUNCEMENT SEARCH AND FILTER STATE
-  // ---------------------------------------------------
+  // =====================================================
+  // 4. ANNOUNCEMENT SEARCH STATE
+  // =====================================================
 
   const [announcementSearch, setAnnouncementSearch] =
     useState("");
@@ -111,37 +145,23 @@ function App() {
 
   const [adminSearch, setAdminSearch] = useState("");
 
-
-  // ---------------------------------------------------
-  // 5. FEEDBACK SEARCH AND FILTER STATE
-  // ---------------------------------------------------
+  // =====================================================
+  // 5. FEEDBACK MANAGEMENT SEARCH STATE
+  // =====================================================
 
   const [feedbackSearch, setFeedbackSearch] = useState("");
 
   const [feedbackStatus, setFeedbackStatus] =
     useState("All statuses");
 
-
-  // ---------------------------------------------------
-  // 6. FEEDBACK TRACKING STATE
-  // ---------------------------------------------------
-
-  const [trackRef, setTrackRef] = useState("");
-
-  const [trackEmail, setTrackEmail] = useState("");
-
-  const [trackAttempted, setTrackAttempted] = useState(false);
-
-  const [historyEmail, setHistoryEmail] = useState("");
-
-  const [historyShown, setHistoryShown] = useState(false);
-
+  // Email tracking search is now managed inside
+  // FeedbackTracking.jsx instead of App.jsx.
 
   // =====================================================
-  // LOCAL STORAGE PERSISTENCE
+  // 6. LOCAL STORAGE PERSISTENCE
   // =====================================================
 
-  // Save announcements when announcement data changes
+  // Save announcements whenever they change
   useEffect(() => {
 
     localStorage.setItem(
@@ -151,8 +171,7 @@ function App() {
 
   }, [announcements]);
 
-
-  // Save feedback when feedback data changes
+  // Save feedback whenever it changes
   useEffect(() => {
 
     localStorage.setItem(
@@ -162,12 +181,10 @@ function App() {
 
   }, [feedback]);
 
-
   // =====================================================
-  // NAVIGATION FUNCTIONS
+  // 7. NAVIGATION FUNCTIONS
   // =====================================================
 
-  // Navigate between pages
   const goto = (page) => {
 
     setTab(page);
@@ -181,8 +198,7 @@ function App() {
 
   };
 
-
-  // Switch between public and administrator views
+  // Switch between public and administrator demo
   const roleChange = () => {
 
     setAdmin(!admin);
@@ -195,25 +211,30 @@ function App() {
 
   };
 
-
   // =====================================================
-  // MODULE 2: COMMUNITY FEEDBACK
+  // MODULE 2: COMMUNITY FEEDBACK SUBMISSION
   // =====================================================
 
-  // Submit new feedback
   const addFeedback = (form) => {
 
+    // Get submission date and time
     const currentDate = new Date();
 
     const timestamp = currentDate.toISOString();
 
-    const id = `FB-${currentDate.getFullYear()}-${makeId("R")
-      .slice(-8)
-      .toUpperCase()}`;
+    // Generate date-based tracking reference
+    let trackingId = generateTrackingId(currentDate);
 
+    // Avoid duplicate references within local data
+    while (feedback.some((item) => item.id === trackingId)) {
+      trackingId = generateTrackingId(currentDate);
+    }
+
+    // Create the feedback record
     const newFeedback = {
-
       ...form,
+
+      id: trackingId,
 
       name: form.name.trim(),
 
@@ -223,8 +244,6 @@ function App() {
 
       description: form.description.trim(),
 
-      id: id,
-
       status: "Submitted",
 
       createdAt: timestamp,
@@ -232,41 +251,37 @@ function App() {
       updatedAt: timestamp,
 
       adminNote: "",
-
     };
 
-    // Add new feedback to the beginning of the list
+    // Save new feedback to React state
     setFeedback((previousFeedback) => [
       newFeedback,
       ...previousFeedback,
     ]);
 
-    // Return reference number for tracking
-    return id;
+    // Return the reference to FeedbackForm
+    return trackingId;
 
   };
-
 
   // =====================================================
   // MODULE 3: ANNOUNCEMENT MANAGEMENT
   // =====================================================
 
-  // Create or update an announcement
+  // Create or update a construction announcement
   const saveAnnouncement = (form) => {
 
     if (editing) {
 
-      // Update existing announcement
+      // Update an existing announcement
       setAnnouncements((previousAnnouncements) =>
         previousAnnouncements.map((announcement) => {
 
           if (announcement.id === editing.id) {
-
             return {
               ...form,
               id: announcement.id,
             };
-
           }
 
           return announcement;
@@ -278,11 +293,8 @@ function App() {
 
       // Create a new announcement
       const newAnnouncement = {
-
         ...form,
-
         id: makeId("ann"),
-
       };
 
       setAnnouncements((previousAnnouncements) => [
@@ -297,8 +309,7 @@ function App() {
 
   };
 
-
-  // Delete an announcement
+  // Delete a construction announcement
   const deleteAnnouncement = () => {
 
     if (!deleteTarget) {
@@ -312,17 +323,15 @@ function App() {
       )
     );
 
-    // Close confirmation modal
     setDeleteTarget(null);
 
   };
-
 
   // =====================================================
   // MODULE 4: FEEDBACK MANAGEMENT
   // =====================================================
 
-  // Update feedback status or administrator note
+  // Administrator updates feedback status or notes
   const updateFeedback = (id, data) => {
 
     setFeedback((previousFeedback) =>
@@ -331,13 +340,9 @@ function App() {
         if (item.id === id) {
 
           return {
-
             ...item,
-
             ...data,
-
             updatedAt: new Date().toISOString(),
-
           };
 
         }
@@ -349,12 +354,10 @@ function App() {
 
   };
 
-
   // =====================================================
-  // ANNOUNCEMENT FILTERING
+  // 8. PUBLIC ANNOUNCEMENT FILTERING
   // =====================================================
 
-  // Filter announcements for public users
   const filteredAnnouncements = useMemo(() => {
 
     return announcements
@@ -372,7 +375,7 @@ function App() {
         `.toLowerCase();
 
         const matchesSearch = searchableText.includes(
-          announcementSearch.toLowerCase()
+          announcementSearch.trim().toLowerCase()
         );
 
         return matchesCategory && matchesSearch;
@@ -387,8 +390,10 @@ function App() {
     announcementSearch,
   ]);
 
+  // =====================================================
+  // 9. ADMIN ANNOUNCEMENT FILTERING
+  // =====================================================
 
-  // Filter announcements for administrators
   const filteredAdmin = useMemo(() => {
 
     return announcements
@@ -402,7 +407,7 @@ function App() {
         `.toLowerCase();
 
         return searchableText.includes(
-          adminSearch.toLowerCase()
+          adminSearch.trim().toLowerCase()
         );
 
       })
@@ -411,9 +416,8 @@ function App() {
 
   }, [announcements, adminSearch]);
 
-
   // =====================================================
-  // FEEDBACK FILTERING
+  // 10. ADMIN FEEDBACK FILTERING
   // =====================================================
 
   const filteredFeedback = useMemo(() => {
@@ -434,7 +438,7 @@ function App() {
         `.toLowerCase();
 
         const matchesSearch = searchableText.includes(
-          feedbackSearch.toLowerCase()
+          feedbackSearch.trim().toLowerCase()
         );
 
         return matchesStatus && matchesSearch;
@@ -451,29 +455,8 @@ function App() {
     feedbackSearch,
   ]);
 
-
   // =====================================================
-  // FEEDBACK TRACKING
-  // =====================================================
-
-  // Find feedback matching reference and email
-  const tracked = feedback.find((item) => {
-
-    const matchesReference =
-      item.id.toLowerCase() ===
-      trackRef.trim().toLowerCase();
-
-    const matchesEmail =
-      item.email.toLowerCase() ===
-      trackEmail.trim().toLowerCase();
-
-    return matchesReference && matchesEmail;
-
-  });
-
-
-  // =====================================================
-  // FEATURED ANNOUNCEMENT
+  // 11. FEATURED ANNOUNCEMENT
   // =====================================================
 
   const featured =
@@ -487,25 +470,25 @@ function App() {
     [...announcements]
       .sort((a, b) => b.date.localeCompare(a.date))[0];
 
-
   // =====================================================
-  // NAVIGATION MENU ITEMS
+  // 12. NAVIGATION MENU
   // =====================================================
 
   const navItems = admin
 
     ? [
-
         ["dashboard", "Dashboard", LayoutDashboard],
 
-        ["manage-announcements", "Announcements", Megaphone],
+        [
+          "manage-announcements",
+          "Announcements",
+          Megaphone,
+        ],
 
         ["manage-feedback", "Feedback inbox", Inbox],
-
       ]
 
     : [
-
         ["home", "Home", LayoutDashboard],
 
         ["announcements", "Announcements", Megaphone],
@@ -513,16 +496,13 @@ function App() {
         ["submit", "Submit feedback", MessageSquareText],
 
         ["track", "Track feedback", ClipboardList],
-
       ];
 
-
   // =====================================================
-  // USER INTERFACE
+  // 13. USER INTERFACE
   // =====================================================
 
   return (
-
     <div className="min-h-screen bg-[#f6f9fa] text-navy">
 
       {/* ============================================= */}
@@ -533,11 +513,10 @@ function App() {
 
         <span className="mr-2 inline-block h-1.5 w-1.5 rounded-full bg-amber" />
 
-        DEMONSTRATION PORTAL — Sample construction information,
-        not an official source
+        DEMONSTRATION PORTAL — Sample construction
+        information, not an official source
 
       </div>
-
 
       {/* ============================================= */}
       {/* HEADER AND NAVIGATION */}
@@ -547,39 +526,36 @@ function App() {
 
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-4 lg:px-8">
 
-          {/* Website logo */}
-
+          {/* WEBSITE LOGO */}
           <button
+            type="button"
             className="flex min-w-0 items-center gap-3 text-left"
-            onClick={() => goto(admin ? "dashboard" : "home")}
+            onClick={() =>
+              goto(admin ? "dashboard" : "home")
+            }
           >
 
             <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-teal text-white">
-
               <TrainFront size={25} />
-
             </span>
 
             <span className="min-w-0">
 
               <span className="block truncate font-extrabold tracking-tight">
-
                 PENANG <span className="text-teal">LRT</span>
-
               </span>
 
               <span className="block truncate text-[10px] font-bold uppercase tracking-wider text-slate-500">
-
                 Mutiara Line · Community Portal
-
               </span>
 
             </span>
 
           </button>
 
-
-          {/* Desktop navigation */}
+          {/* ======================================= */}
+          {/* DESKTOP NAVIGATION */}
+          {/* ======================================= */}
 
           <nav
             className="hidden items-center gap-1 lg:flex"
@@ -590,6 +566,7 @@ function App() {
 
               <button
                 key={id}
+                type="button"
                 onClick={() => goto(id)}
                 className={`
                   navlink
@@ -600,21 +577,21 @@ function App() {
                   }
                 `}
               >
-
                 {label}
-
               </button>
 
             ))}
 
           </nav>
 
-
-          {/* Admin switch and mobile menu */}
+          {/* ======================================= */}
+          {/* ADMIN SWITCH AND MOBILE BUTTON */}
+          {/* ======================================= */}
 
           <div className="flex items-center gap-2">
 
             <button
+              type="button"
               onClick={roleChange}
               aria-label={
                 admin
@@ -638,8 +615,8 @@ function App() {
 
             </button>
 
-
             <button
+              type="button"
               className="rounded-lg p-2 lg:hidden"
               aria-label="Toggle navigation"
               aria-expanded={mobileMenu}
@@ -654,8 +631,9 @@ function App() {
 
         </div>
 
-
-        {/* Mobile navigation */}
+        {/* ======================================= */}
+        {/* MOBILE NAVIGATION */}
+        {/* ======================================= */}
 
         {mobileMenu && (
 
@@ -668,6 +646,7 @@ function App() {
 
               <button
                 key={id}
+                type="button"
                 onClick={() => goto(id)}
                 className={`
                   flex w-full items-center gap-3 rounded-xl
@@ -688,8 +667,8 @@ function App() {
 
             ))}
 
-
             <button
+              type="button"
               className="mt-2 flex w-full items-center gap-3 rounded-xl bg-navy px-4 py-3 text-sm font-bold text-white"
               onClick={roleChange}
             >
@@ -708,14 +687,15 @@ function App() {
 
       </header>
 
-
       {/* ============================================= */}
       {/* MAIN APPLICATION CONTENT */}
       {/* ============================================= */}
 
       <main>
 
-        {/* HOME PAGE - PUBLIC */}
+        {/* ======================================= */}
+        {/* HOME PAGE */}
+        {/* ======================================= */}
 
         {tab === "home" && !admin && (
 
@@ -729,8 +709,9 @@ function App() {
 
         )}
 
-
+        {/* ======================================= */}
         {/* MODULE 1: CONSTRUCTION ANNOUNCEMENTS */}
+        {/* ======================================= */}
 
         {tab === "announcements" && !admin && (
 
@@ -745,8 +726,9 @@ function App() {
 
         )}
 
-
+        {/* ======================================= */}
         {/* MODULE 2: COMMUNITY FEEDBACK */}
+        {/* ======================================= */}
 
         {tab === "submit" && !admin && (
 
@@ -756,31 +738,22 @@ function App() {
 
         )}
 
-
-        {/* PUBLIC FEEDBACK TRACKING */}
+        {/* ======================================= */}
+        {/* NEW: EMAIL-BASED FEEDBACK TRACKING */}
+        {/* ======================================= */}
 
         {tab === "track" && !admin && (
 
           <FeedbackTracking
-            trackRef={trackRef}
-            setTrackRef={setTrackRef}
-            trackEmail={trackEmail}
-            setTrackEmail={setTrackEmail}
-            trackAttempted={trackAttempted}
-            setTrackAttempted={setTrackAttempted}
-            tracked={tracked}
-            historyEmail={historyEmail}
-            setHistoryEmail={setHistoryEmail}
-            historyShown={historyShown}
-            setHistoryShown={setHistoryShown}
             feedback={feedback}
             setSelectedFeedback={setSelectedFeedback}
           />
 
         )}
 
-
+        {/* ======================================= */}
         {/* ADMIN DASHBOARD */}
+        {/* ======================================= */}
 
         {tab === "dashboard" && admin && (
 
@@ -794,8 +767,9 @@ function App() {
 
         )}
 
-
+        {/* ======================================= */}
         {/* MODULE 3: ANNOUNCEMENT MANAGEMENT */}
+        {/* ======================================= */}
 
         {tab === "manage-announcements" && admin && (
 
@@ -810,8 +784,9 @@ function App() {
 
         )}
 
-
+        {/* ======================================= */}
         {/* MODULE 4: FEEDBACK MANAGEMENT */}
+        {/* ======================================= */}
 
         {tab === "manage-feedback" && admin && (
 
@@ -828,7 +803,6 @@ function App() {
 
       </main>
 
-
       {/* ============================================= */}
       {/* FOOTER */}
       {/* ============================================= */}
@@ -837,16 +811,13 @@ function App() {
 
         <div className="mx-auto grid max-w-7xl gap-8 px-5 py-12 md:grid-cols-[1.2fr_1fr] lg:px-8">
 
-          {/* Website information */}
-
+          {/* WEBSITE INFORMATION */}
           <div>
 
             <div className="flex items-center gap-3">
 
               <div className="rounded-xl bg-teal p-2">
-
                 <TrainFront size={23} />
-
               </div>
 
               <div>
@@ -864,20 +835,15 @@ function App() {
             </div>
 
             <p className="mt-5 max-w-md text-sm leading-7 text-slate-400">
-
-              A frontend demonstration for sharing construction
-              information and gathering community feedback.
-
-              Not affiliated with or endorsed by official
-              project authorities.
-
+              A frontend demonstration for sharing
+              construction information and gathering
+              community feedback. Not affiliated with
+              or endorsed by official project authorities.
             </p>
 
           </div>
 
-
-          {/* Quick links */}
-
+          {/* QUICK LINKS */}
           <div className="md:justify-self-end">
 
             <p className="font-extrabold">
@@ -887,6 +853,7 @@ function App() {
             <div className="mt-4 flex flex-col items-start gap-3 text-sm text-slate-300">
 
               <button
+                type="button"
                 className="hover:text-white"
                 onClick={() => {
                   setAdmin(false);
@@ -897,6 +864,7 @@ function App() {
               </button>
 
               <button
+                type="button"
                 className="hover:text-white"
                 onClick={() => {
                   setAdmin(false);
@@ -907,6 +875,7 @@ function App() {
               </button>
 
               <button
+                type="button"
                 className="hover:text-white"
                 onClick={() => {
                   setAdmin(false);
@@ -922,12 +891,11 @@ function App() {
 
         </div>
 
-
-        {/* Copyright */}
-
+        {/* COPYRIGHT */}
         <div className="border-t border-white/10 px-4 py-5 text-center text-xs text-slate-400">
 
-          © {new Date().getFullYear()} Mutiara Line Community Portal
+          © {new Date().getFullYear()} Mutiara Line
+          Community Portal
 
           {" · "}Academic / demonstration use only
 
@@ -937,7 +905,6 @@ function App() {
 
       </footer>
 
-
       {/* ============================================= */}
       {/* ANNOUNCEMENT DETAILS MODAL */}
       {/* ============================================= */}
@@ -946,11 +913,12 @@ function App() {
 
         <AnnouncementDetails
           item={selectedAnnouncement}
-          onClose={() => setSelectedAnnouncement(null)}
+          onClose={() =>
+            setSelectedAnnouncement(null)
+          }
         />
 
       )}
-
 
       {/* ============================================= */}
       {/* FEEDBACK DETAILS MODAL */}
@@ -967,11 +935,12 @@ function App() {
           }
           isAdmin={admin}
           onUpdate={updateFeedback}
-          onClose={() => setSelectedFeedback(null)}
+          onClose={() =>
+            setSelectedFeedback(null)
+          }
         />
 
       )}
-
 
       {/* ============================================= */}
       {/* CREATE / EDIT ANNOUNCEMENT MODAL */}
@@ -986,19 +955,22 @@ function App() {
               : "Create announcement"
           }
           wide
-          onClose={() => setEditing(undefined)}
+          onClose={() =>
+            setEditing(undefined)
+          }
         >
 
           <AnnouncementForm
             initial={editing || undefined}
-            onCancel={() => setEditing(undefined)}
+            onCancel={() =>
+              setEditing(undefined)
+            }
             onSave={saveAnnouncement}
           />
 
         </Modal>
 
       )}
-
 
       {/* ============================================= */}
       {/* DELETE ANNOUNCEMENT CONFIRMATION */}
@@ -1008,7 +980,9 @@ function App() {
 
         <Modal
           title="Delete announcement?"
-          onClose={() => setDeleteTarget(null)}
+          onClose={() =>
+            setDeleteTarget(null)
+          }
         >
 
           <p className="text-sm leading-7 text-slate-600">
@@ -1017,22 +991,25 @@ function App() {
 
             <b>{deleteTarget.title}</b>?
 
-            This deletes the announcement from this browser
-            and cannot be undone.
+            {" "}This deletes the announcement from
+            this browser and cannot be undone.
 
           </p>
-
 
           <div className="mt-7 flex justify-end gap-3">
 
             <button
+              type="button"
               className="secondary"
-              onClick={() => setDeleteTarget(null)}
+              onClick={() =>
+                setDeleteTarget(null)
+              }
             >
               Cancel
             </button>
 
             <button
+              type="button"
               className="rounded-xl bg-red-600 px-5 py-3 text-sm font-bold text-white hover:bg-red-700"
               onClick={deleteAnnouncement}
             >
@@ -1046,9 +1023,11 @@ function App() {
       )}
 
     </div>
-
   );
-
 }
+
+// =====================================================
+// EXPORT APPLICATION
+// =====================================================
 
 export default App;

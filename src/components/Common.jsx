@@ -324,140 +324,137 @@ function Field({
 // =====================================================
 
 function ConstructionAccessInfo({ item }) {
+  // Older sample announcements may not include affectedGroups.
+  const legacy = !Array.isArray(item.affectedGroups);
+  const groups = item.affectedGroups || [];
+
+  const showPedestrians = groups.includes("pedestrians") ||
+    (legacy && Boolean(item.pedestrianDetails || item.alternativeWalkingRoute));
+
+  const showBusiness = groups.includes("business") ||
+    (legacy && Boolean(item.affectedBusinesses || item.alternativeBusinessAccess));
+
+  const showCommuters = groups.includes("commuters");
+  const showResidents = groups.includes("residents");
+
   return (
     <div className="mt-6 space-y-4">
-
-      {/* ------------------------------------------ */}
-      {/* FUNCTION 1: VIEW AFFECTED LOCATIONS */}
-      {/* ------------------------------------------ */}
-
+      {/* Affected locations are displayed for every announcement. */}
       <section className="rounded-xl bg-slate-50 p-5">
-
         <div className="flex items-center gap-2">
-
-          <MapPin
-            size={20}
-            className="text-teal"
-          />
-
-          <h3 className="font-bold">
-            Affected Locations
-          </h3>
-
+          <MapPin size={20} className="text-teal" />
+          <h3 className="font-bold">Affected Locations</h3>
         </div>
-
-        <p className="mt-3 text-sm text-slate-600">
-          {item.location}
-        </p>
-
+        <p className="mt-3 text-sm text-slate-600">{item.location}</p>
         {item.affectedAreas && (
           <p className="mt-2 whitespace-pre-wrap text-sm text-slate-600">
             {item.affectedAreas}
           </p>
         )}
-
       </section>
 
-
-      {/* ------------------------------------------ */}
-      {/* FUNCTION 2: PEDESTRIAN ACCESS UPDATES */}
-      {/* ------------------------------------------ */}
-
-      <section className="rounded-xl bg-slate-50 p-5">
-
-        <div className="flex items-center gap-2">
-
-          <Footprints
-            size={20}
-            className="text-teal"
-          />
-
-          <h3 className="font-bold">
-            Pedestrian Access Updates
-          </h3>
-
-        </div>
-
-        <p className="mt-3 text-sm font-semibold">
-          Status: {item.pedestrianStatus || "Not specified"}
-        </p>
-
-        {item.pedestrianDetails && (
-          <p className="mt-2 whitespace-pre-wrap text-sm text-slate-600">
-            {item.pedestrianDetails}
+      {showPedestrians && (
+        <section className="rounded-xl bg-slate-50 p-5">
+          <div className="flex items-center gap-2">
+            <Footprints size={20} className="text-teal" />
+            <h3 className="font-bold">Pedestrian Access Updates</h3>
+          </div>
+          <p className="mt-3 text-sm font-semibold">
+            Status: {item.pedestrianStatus || "Not specified"}
           </p>
-        )}
-
-        {item.alternativeWalkingRoute && (
-          <div className="mt-3 rounded-lg bg-white p-3">
-
-            <p className="text-sm font-bold">
-              Alternative Walking Route
+          {item.pedestrianDetails && (
+            <p className="mt-2 whitespace-pre-wrap text-sm text-slate-600">
+              {item.pedestrianDetails}
             </p>
+          )}
+          {item.alternativeWalkingRoute && (
+            <div className="mt-3 rounded-lg bg-white p-3">
+              <p className="text-sm font-bold">Alternative Walking Route</p>
+              <p className="mt-1 whitespace-pre-wrap text-sm text-slate-600">
+                {item.alternativeWalkingRoute}
+              </p>
+            </div>
+          )}
+        </section>
+      )}
 
-            <p className="mt-1 whitespace-pre-wrap text-sm text-slate-600">
-              {item.alternativeWalkingRoute}
-            </p>
-
+      {showBusiness && (
+        <section className="rounded-xl bg-slate-50 p-5">
+          <div className="flex items-center gap-2">
+            <Store size={20} className="text-teal" />
+            <h3 className="font-bold">Business Access Information</h3>
           </div>
-        )}
+          <p className="mt-3 text-sm font-semibold">
+            Status: {item.businessStatus || "Not specified"}
+          </p>
+          {item.affectedBusinesses && (
+            <div className="mt-3">
+              <p className="text-sm font-bold">Affected Business Premises</p>
+              <p className="mt-1 whitespace-pre-wrap text-sm text-slate-600">
+                {item.affectedBusinesses}
+              </p>
+            </div>
+          )}
+          {item.alternativeBusinessAccess && (
+            <div className="mt-3 rounded-lg bg-white p-3">
+              <p className="text-sm font-bold">Alternative Business Access</p>
+              <p className="mt-1 whitespace-pre-wrap text-sm text-slate-600">
+                {item.alternativeBusinessAccess}
+              </p>
+            </div>
+          )}
+        </section>
+      )}
 
-      </section>
-
-
-      {/* ------------------------------------------ */}
-      {/* FUNCTION 3: BUSINESS ACCESS INFORMATION */}
-      {/* ------------------------------------------ */}
-
-      <section className="rounded-xl bg-slate-50 p-5">
-
-        <div className="flex items-center gap-2">
-
-          <Store
-            size={20}
-            className="text-teal"
-          />
-
-          <h3 className="font-bold">
-            Business Access Information
-          </h3>
-
-        </div>
-
-        <p className="mt-3 text-sm font-semibold">
-          Status: {item.businessStatus || "Not specified"}
-        </p>
-
-        {item.affectedBusinesses && (
-          <div className="mt-3">
-
-            <p className="text-sm font-bold">
-              Affected Business Premises
-            </p>
-
-            <p className="mt-1 whitespace-pre-wrap text-sm text-slate-600">
-              {item.affectedBusinesses}
-            </p>
-
+      {showCommuters && (
+        <section className="rounded-xl bg-slate-50 p-5">
+          <div className="flex items-center gap-2">
+            <Route size={20} className="text-teal" />
+            <h3 className="font-bold">Commuter Information</h3>
           </div>
-        )}
-
-        {item.alternativeBusinessAccess && (
-          <div className="mt-3 rounded-lg bg-white p-3">
-
-            <p className="text-sm font-bold">
-              Alternative Business Access
+          <p className="mt-3 text-sm font-semibold">
+            Status: {item.commuterStatus || "Not specified"}
+          </p>
+          {item.commuterDetails && (
+            <p className="mt-2 whitespace-pre-wrap text-sm text-slate-600">
+              {item.commuterDetails}
             </p>
+          )}
+          {item.alternativeTransport && (
+            <div className="mt-3 rounded-lg bg-white p-3">
+              <p className="text-sm font-bold">Alternative Transport Arrangements</p>
+              <p className="mt-1 whitespace-pre-wrap text-sm text-slate-600">
+                {item.alternativeTransport}
+              </p>
+            </div>
+          )}
+        </section>
+      )}
 
-            <p className="mt-1 whitespace-pre-wrap text-sm text-slate-600">
-              {item.alternativeBusinessAccess}
-            </p>
-
+      {showResidents && (
+        <section className="rounded-xl bg-slate-50 p-5">
+          <div className="flex items-center gap-2">
+            <Users size={20} className="text-teal" />
+            <h3 className="font-bold">Residential Impact Information</h3>
           </div>
-        )}
-
-      </section>
-
+          <p className="mt-3 text-sm font-semibold">
+            Status: {item.residentStatus || "Not specified"}
+          </p>
+          {item.residentDetails && (
+            <p className="mt-2 whitespace-pre-wrap text-sm text-slate-600">
+              {item.residentDetails}
+            </p>
+          )}
+          {item.mitigationMeasures && (
+            <div className="mt-3 rounded-lg bg-white p-3">
+              <p className="text-sm font-bold">Mitigation and Alternative Arrangements</p>
+              <p className="mt-1 whitespace-pre-wrap text-sm text-slate-600">
+                {item.mitigationMeasures}
+              </p>
+            </div>
+          )}
+        </section>
+      )}
     </div>
   );
 }
@@ -563,50 +560,92 @@ const blankAnnouncement = {
   category: "Construction Update",
   featured: false,
 
-  // Affected locations and map marker coordinates
+  // General affected location and optional map position
   affectedAreas: "",
   latitude: "",
   longitude: "",
 
-  // Pedestrian access
+  // One or more groups can be selected
+  affectedGroups: [],
+
+  // Pedestrian information
   pedestrianStatus: "Open",
   pedestrianDetails: "",
   alternativeWalkingRoute: "",
 
-  // Business access
+  // Business information
   businessStatus: "Normal Access",
   affectedBusinesses: "",
   alternativeBusinessAccess: "",
+
+  // Commuter information
+  commuterStatus: "Normal",
+  commuterDetails: "",
+  alternativeTransport: "",
+
+  // Residential information
+  residentStatus: "Normal",
+  residentDetails: "",
+  mitigationMeasures: "",
 };
 
+const affectedGroupOptions = [
+  {
+    id: "pedestrians",
+    label: "Pedestrians",
+    description: "Footpaths, crossings and walking diversions",
+  },
+  {
+    id: "business",
+    label: "Business owners",
+    description: "Shops, deliveries and customer access",
+  },
+  {
+    id: "commuters",
+    label: "Commuters",
+    description: "Traffic, road closures and public transport",
+  },
+  {
+    id: "residents",
+    label: "Residents",
+    description: "Homes, neighbourhood access and disturbance",
+  },
+];
 
 // =====================================================
 // 11. ANNOUNCEMENT FORM
-// MODULE 3: ADD / EDIT ANNOUNCEMENT
+// Module 3: show details only for selected groups
 // =====================================================
 
-function AnnouncementForm({
-  initial,
-  onSave,
-  onCancel,
-}) {
-  // Initialize form data
-  const [form, setForm] = useState({
+function AnnouncementForm({ initial, onSave, onCancel }) {
+  const [form, setForm] = useState(() => ({
     ...blankAnnouncement,
     ...(initial || {}),
-  });
+    affectedGroups: Array.isArray(initial?.affectedGroups)
+      ? initial.affectedGroups
+      : [],
+  }));
 
-  // Update individual form fields
-  const update = (key, value) => {
-    setForm((previousForm) => ({
-      ...previousForm,
-      [key]: value,
+  const update = (field, value) => {
+    setForm((previous) => ({ ...previous, [field]: value }));
+  };
+
+  const toggleAffectedGroup = (groupId) => {
+    setForm((previous) => ({
+      ...previous,
+      affectedGroups: previous.affectedGroups.includes(groupId)
+        ? previous.affectedGroups.filter((id) => id !== groupId)
+        : [...previous.affectedGroups, groupId],
     }));
   };
 
-  // Validate date range and optional geographic coordinates
+  const affectsPedestrians = form.affectedGroups.includes("pedestrians");
+  const affectsBusiness = form.affectedGroups.includes("business");
+  const affectsCommuters = form.affectedGroups.includes("commuters");
+  const affectsResidents = form.affectedGroups.includes("residents");
+
   const invalidDate = Boolean(
-    form.endDate && form.date && form.endDate < form.date
+    form.date && form.endDate && form.endDate < form.date
   );
 
   const latitude = String(form.latitude ?? "").trim();
@@ -614,415 +653,313 @@ function AnnouncementForm({
   const hasLatitude = latitude !== "";
   const hasLongitude = longitude !== "";
 
-  // Coordinates are optional, but must be supplied as a valid pair.
   const invalidCoordinates =
     hasLatitude !== hasLongitude ||
-    (hasLatitude &&
-      (!Number.isFinite(Number(latitude)) ||
-        !Number.isFinite(Number(longitude)) ||
-        Number(latitude) < -90 ||
-        Number(latitude) > 90 ||
-        Number(longitude) < -180 ||
-        Number(longitude) > 180));
+    (hasLatitude && (
+      !Number.isFinite(Number(latitude)) ||
+      !Number.isFinite(Number(longitude)) ||
+      Number(latitude) < -90 || Number(latitude) > 90 ||
+      Number(longitude) < -180 || Number(longitude) > 180
+    ));
 
-  // Submit announcement
+  const missingGroup = form.affectedGroups.length === 0;
+  const hasErrors = invalidDate || invalidCoordinates || missingGroup;
+
   const handleSubmit = (event) => {
     event.preventDefault();
+    if (hasErrors) return;
 
-    if (invalidDate || invalidCoordinates) {
-      return;
-    }
-
-    onSave({
+    // Clear data for groups that are not selected.
+    const prepared = {
       ...form,
       title: form.title.trim(),
       description: form.description.trim(),
       location: form.location.trim(),
+      affectedAreas: form.affectedAreas.trim(),
       latitude,
       longitude,
-      affectedAreas: form.affectedAreas.trim(),
-      pedestrianDetails: form.pedestrianDetails.trim(),
-      alternativeWalkingRoute:
-        form.alternativeWalkingRoute.trim(),
-      affectedBusinesses: form.affectedBusinesses.trim(),
-      alternativeBusinessAccess:
-        form.alternativeBusinessAccess.trim(),
-    });
+
+      pedestrianStatus: affectsPedestrians ? form.pedestrianStatus : "",
+      pedestrianDetails: affectsPedestrians ? form.pedestrianDetails.trim() : "",
+      alternativeWalkingRoute: affectsPedestrians
+        ? form.alternativeWalkingRoute.trim() : "",
+
+      businessStatus: affectsBusiness ? form.businessStatus : "",
+      affectedBusinesses: affectsBusiness ? form.affectedBusinesses.trim() : "",
+      alternativeBusinessAccess: affectsBusiness
+        ? form.alternativeBusinessAccess.trim() : "",
+
+      commuterStatus: affectsCommuters ? form.commuterStatus : "",
+      commuterDetails: affectsCommuters ? form.commuterDetails.trim() : "",
+      alternativeTransport: affectsCommuters
+        ? form.alternativeTransport.trim() : "",
+
+      residentStatus: affectsResidents ? form.residentStatus : "",
+      residentDetails: affectsResidents ? form.residentDetails.trim() : "",
+      mitigationMeasures: affectsResidents
+        ? form.mitigationMeasures.trim() : "",
+    };
+
+    onSave(prepared);
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="space-y-5"
-    >
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {/* BASIC ANNOUNCEMENT */}
+      <section className="space-y-4">
+        <h3 className="text-lg font-bold">Basic Announcement Information</h3>
 
-      {/* ------------------------------------------ */}
-      {/* BASIC ANNOUNCEMENT INFORMATION */}
-      {/* ------------------------------------------ */}
-
-      <h3 className="text-lg font-bold">
-        Basic Announcement Information
-      </h3>
-
-      <Field label="Announcement title" required>
-        <input
-          required
-          maxLength={120}
-          className="field"
-          value={form.title}
-          onChange={(event) =>
-            update("title", event.target.value)
-          }
-          placeholder="e.g. Upcoming utility diversion works"
-        />
-      </Field>
-
-      <Field label="Description" required>
-        <textarea
-          required
-          rows={5}
-          maxLength={3000}
-          className="field resize-y"
-          value={form.description}
-          onChange={(event) =>
-            update("description", event.target.value)
-          }
-          placeholder="Describe the construction activities"
-        />
-      </Field>
-
-      <div className="grid gap-4 sm:grid-cols-2">
-
-        <Field label="Category" required>
-          <select
-            className="field"
-            value={form.category}
-            onChange={(event) =>
-              update("category", event.target.value)
-            }
-          >
-            {ANNOUNCEMENT_CATEGORIES.map((category) => (
-              <option key={category} value={category}>
-                {category}
-              </option>
-            ))}
-          </select>
+        <Field label="Announcement title" required>
+          <input required maxLength={120} className="field"
+            value={form.title}
+            onChange={(event) => update("title", event.target.value)}
+            placeholder="Enter announcement title" />
         </Field>
 
-        <Field label="Affected location" required>
-          <input
-            required
-            maxLength={120}
-            className="field"
-            value={form.location}
-            onChange={(event) =>
-              update("location", event.target.value)
-            }
-            placeholder="e.g. Gelugor"
-          />
+        <Field label="Description" required>
+          <textarea required rows={5} maxLength={3000} className="field"
+            value={form.description}
+            onChange={(event) => update("description", event.target.value)}
+            placeholder="Describe construction activities and changes" />
         </Field>
 
-        <Field label="Start date" required>
-          <input
-            required
-            type="date"
-            className="field"
-            value={form.date}
-            onChange={(event) =>
-              update("date", event.target.value)
-            }
-          />
-        </Field>
-
-        <Field label="End date (optional)">
-          <input
-            type="date"
-            className="field"
-            min={form.date}
-            value={form.endDate}
-            onChange={(event) =>
-              update("endDate", event.target.value)
-            }
-          />
-        </Field>
-
-      </div>
-
-      {invalidDate && (
-        <p role="alert" className="text-sm text-red-600">
-          End date cannot be earlier than the start date.
-        </p>
-      )}
-
-
-      {/* ------------------------------------------ */}
-      {/* FUNCTION 1: AFFECTED LOCATIONS */}
-      {/* ------------------------------------------ */}
-
-      <div className="border-t border-slate-200 pt-5">
-
-        <h3 className="mb-4 text-lg font-bold">
-          Affected Locations
-        </h3>
-
-        <Field label="Affected Areas">
-          <textarea
-            rows={3}
-            maxLength={1000}
-            className="field"
-            value={form.affectedAreas}
-            onChange={(event) =>
-              update("affectedAreas", event.target.value)
-            }
-            placeholder="Describe affected roads, areas or landmarks"
-          />
-        </Field>
-
-        {/* Optional coordinates for the interactive map */}
-        <div className="mt-4 grid gap-4 sm:grid-cols-2">
-          <Field label="Latitude (optional)">
-            <input
-              type="number"
-              step="any"
-              min="-90"
-              max="90"
-              className="field"
-              value={form.latitude ?? ""}
-              onChange={(event) =>
-                update("latitude", event.target.value)
-              }
-              placeholder="e.g. 5.3500"
-            />
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="Announcement category" required>
+            <select className="field" value={form.category}
+              onChange={(event) => update("category", event.target.value)}>
+              {ANNOUNCEMENT_CATEGORIES.map((category) => (
+                <option key={category} value={category}>{category}</option>
+              ))}
+            </select>
           </Field>
 
-          <Field label="Longitude (optional)">
-            <input
-              type="number"
-              step="any"
-              min="-180"
-              max="180"
-              className="field"
-              value={form.longitude ?? ""}
-              onChange={(event) =>
-                update("longitude", event.target.value)
-              }
-              placeholder="e.g. 100.3000"
-            />
+          <Field label="Affected location" required>
+            <input required maxLength={120} className="field"
+              value={form.location}
+              onChange={(event) => update("location", event.target.value)}
+              placeholder="e.g. Gelugor, Penang" />
+          </Field>
+
+          <Field label="Start date" required>
+            <input type="date" required className="field" value={form.date}
+              onChange={(event) => update("date", event.target.value)} />
+          </Field>
+
+          <Field label="End date (optional)">
+            <input type="date" className="field" min={form.date}
+              value={form.endDate}
+              onChange={(event) => update("endDate", event.target.value)} />
           </Field>
         </div>
 
-        <p className="mt-2 text-xs text-slate-500">
-          Enter both coordinates for the map marker. Only use verified
-          construction locations; otherwise leave both fields blank.
-        </p>
-
-        {invalidCoordinates && (
-          <p role="alert" className="mt-2 text-sm text-red-600">
-            Enter a valid latitude and longitude together, or leave both blank.
+        {invalidDate && (
+          <p className="text-sm text-red-600" role="alert">
+            End date cannot be earlier than start date.
           </p>
         )}
+      </section>
 
-      </div>
+      {/* AFFECTED GROUPS: MULTIPLE SELECTION */}
+      <section className="border-t border-slate-200 pt-6">
+        <h3 className="text-lg font-bold">Who Will Be Affected?</h3>
+        <p className="mt-2 text-sm text-slate-500">
+          Select all groups affected. The corresponding detail fields will appear below.
+        </p>
 
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
+          {affectedGroupOptions.map((group) => {
+            const selected = form.affectedGroups.includes(group.id);
 
-      {/* ------------------------------------------ */}
-      {/* FUNCTION 2: PEDESTRIAN ACCESS */}
-      {/* ------------------------------------------ */}
+            return (
+              <label key={group.id}
+                className={`flex cursor-pointer items-start gap-3 rounded-xl border p-4
+                  ${selected ? "border-teal bg-mint/50" : "border-slate-200"}`}>
+                <input type="checkbox" className="mt-1 h-4 w-4 accent-teal"
+                  checked={selected}
+                  onChange={() => toggleAffectedGroup(group.id)} />
+                <span>
+                  <span className="block text-sm font-bold">{group.label}</span>
+                  <span className="mt-1 block text-xs text-slate-500">
+                    {group.description}
+                  </span>
+                </span>
+              </label>
+            );
+          })}
+        </div>
 
-      <div className="border-t border-slate-200 pt-5">
+        {missingGroup && (
+          <p className="mt-3 text-sm text-amber-700">
+            Select at least one affected group to publish this announcement.
+          </p>
+        )}
+      </section>
 
-        <h3 className="mb-4 text-lg font-bold">
-          Pedestrian Access Information
-        </h3>
+      {/* GENERAL LOCATION AND INTERACTIVE MAP */}
+      <section className="space-y-4 border-t border-slate-200 pt-6">
+        <h3 className="text-lg font-bold">Affected Locations</h3>
+        <Field label="Affected areas">
+          <textarea rows={3} maxLength={1000} className="field"
+            value={form.affectedAreas}
+            onChange={(event) => update("affectedAreas", event.target.value)}
+            placeholder="Affected roads, neighbourhoods or landmarks" />
+        </Field>
 
-        <div className="space-y-4">
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="Latitude (optional)">
+            <input type="number" step="any" min="-90" max="90" className="field"
+              value={form.latitude ?? ""}
+              onChange={(event) => update("latitude", event.target.value)}
+              placeholder="Latitude" />
+          </Field>
+          <Field label="Longitude (optional)">
+            <input type="number" step="any" min="-180" max="180" className="field"
+              value={form.longitude ?? ""}
+              onChange={(event) => update("longitude", event.target.value)}
+              placeholder="Longitude" />
+          </Field>
+        </div>
+        <p className="text-xs text-slate-500">
+          Use verified construction site coordinates only. Leave both blank if unknown.
+        </p>
+        {invalidCoordinates && (
+          <p className="text-sm text-red-600" role="alert">
+            Enter both valid coordinates, or leave both blank.
+          </p>
+        )}
+      </section>
 
-          <Field label="Pedestrian Access Status">
-            <select
-              className="field"
-              value={form.pedestrianStatus}
-              onChange={(event) =>
-                update(
-                  "pedestrianStatus",
-                  event.target.value
-                )
-              }
-            >
-              <option value="Open">Open</option>
-
-              <option value="Restricted">
-                Restricted
-              </option>
-
-              <option value="Temporarily Closed">
-                Temporarily Closed
-              </option>
-
-              <option value="Diversion Required">
-                Diversion Required
-              </option>
+      {/* PEDESTRIANS: SHOWN ONLY WHEN SELECTED */}
+      {affectsPedestrians && (
+        <section className="space-y-4 rounded-xl border border-teal/20 bg-mint/30 p-5">
+          <h3 className="text-lg font-bold text-teal">Pedestrian Access Information</h3>
+          <Field label="Pedestrian access status">
+            <select className="field" value={form.pedestrianStatus}
+              onChange={(event) => update("pedestrianStatus", event.target.value)}>
+              <option>Open</option>
+              <option>Restricted</option>
+              <option>Temporarily Closed</option>
+              <option>Diversion Required</option>
             </select>
           </Field>
-
-          <Field label="Pedestrian Access Details">
-            <textarea
-              rows={3}
-              maxLength={1000}
-              className="field"
+          <Field label="Pedestrian access details">
+            <textarea rows={3} maxLength={1000} className="field"
               value={form.pedestrianDetails}
-              onChange={(event) =>
-                update(
-                  "pedestrianDetails",
-                  event.target.value
-                )
-              }
-              placeholder="Describe temporary pedestrian restrictions"
-            />
+              onChange={(event) => update("pedestrianDetails", event.target.value)}
+              placeholder="Footpath restrictions and temporary closures" />
           </Field>
-
-          <Field label="Alternative Walking Route">
-            <textarea
-              rows={3}
-              maxLength={1000}
-              className="field"
+          <Field label="Alternative walking route">
+            <textarea rows={3} maxLength={1000} className="field"
               value={form.alternativeWalkingRoute}
-              onChange={(event) =>
-                update(
-                  "alternativeWalkingRoute",
-                  event.target.value
-                )
-              }
-              placeholder="Describe an approved pedestrian diversion"
-            />
+              onChange={(event) => update("alternativeWalkingRoute", event.target.value)}
+              placeholder="Approved pedestrian diversion route" />
           </Field>
+        </section>
+      )}
 
-        </div>
-
-      </div>
-
-
-      {/* ------------------------------------------ */}
-      {/* FUNCTION 3: BUSINESS ACCESS */}
-      {/* ------------------------------------------ */}
-
-      <div className="border-t border-slate-200 pt-5">
-
-        <h3 className="mb-4 text-lg font-bold">
-          Business Access Information
-        </h3>
-
-        <div className="space-y-4">
-
-          <Field label="Business Access Status">
-            <select
-              className="field"
-              value={form.businessStatus}
-              onChange={(event) =>
-                update(
-                  "businessStatus",
-                  event.target.value
-                )
-              }
-            >
-              <option value="Normal Access">
-                Normal Access
-              </option>
-
-              <option value="Limited Access">
-                Limited Access
-              </option>
-
-              <option value="Temporarily Restricted">
-                Temporarily Restricted
-              </option>
-
-              <option value="Alternative Access Available">
-                Alternative Access Available
-              </option>
+      {/* BUSINESS OWNERS: SHOWN ONLY WHEN SELECTED */}
+      {affectsBusiness && (
+        <section className="space-y-4 rounded-xl border border-teal/20 bg-mint/30 p-5">
+          <h3 className="text-lg font-bold text-teal">Business Access Information</h3>
+          <Field label="Business access status">
+            <select className="field" value={form.businessStatus}
+              onChange={(event) => update("businessStatus", event.target.value)}>
+              <option>Normal Access</option>
+              <option>Limited Access</option>
+              <option>Temporarily Restricted</option>
+              <option>Alternative Access Available</option>
             </select>
           </Field>
-
-          <Field label="Affected Business Premises">
-            <textarea
-              rows={3}
-              maxLength={1000}
-              className="field"
+          <Field label="Affected business premises">
+            <textarea rows={3} maxLength={1000} className="field"
               value={form.affectedBusinesses}
-              onChange={(event) =>
-                update(
-                  "affectedBusinesses",
-                  event.target.value
-                )
-              }
-              placeholder="List affected shops or business areas"
-            />
+              onChange={(event) => update("affectedBusinesses", event.target.value)}
+              placeholder="Shops and business premises affected" />
           </Field>
-
-          <Field label="Alternative Business Access">
-            <textarea
-              rows={3}
-              maxLength={1000}
-              className="field"
+          <Field label="Alternative business access">
+            <textarea rows={3} maxLength={1000} className="field"
               value={form.alternativeBusinessAccess}
-              onChange={(event) =>
-                update(
-                  "alternativeBusinessAccess",
-                  event.target.value
-                )
-              }
-              placeholder="Describe alternative customer or delivery access"
-            />
+              onChange={(event) => update("alternativeBusinessAccess", event.target.value)}
+              placeholder="Customer, staff and delivery access arrangements" />
           </Field>
+        </section>
+      )}
 
-        </div>
+      {/* COMMUTERS: SHOWN ONLY WHEN SELECTED */}
+      {affectsCommuters && (
+        <section className="space-y-4 rounded-xl border border-teal/20 bg-mint/30 p-5">
+          <h3 className="text-lg font-bold text-teal">Commuter Information</h3>
+          <Field label="Commuter disruption status">
+            <select className="field" value={form.commuterStatus}
+              onChange={(event) => update("commuterStatus", event.target.value)}>
+              <option>Normal</option>
+              <option>Traffic Delays</option>
+              <option>Road Diversion</option>
+              <option>Public Transport Changes</option>
+              <option>Road Closure</option>
+            </select>
+          </Field>
+          <Field label="Commuter disruption details">
+            <textarea rows={3} maxLength={1000} className="field"
+              value={form.commuterDetails}
+              onChange={(event) => update("commuterDetails", event.target.value)}
+              placeholder="Affected roads, bus stops or transport services" />
+          </Field>
+          <Field label="Alternative transport arrangements">
+            <textarea rows={3} maxLength={1000} className="field"
+              value={form.alternativeTransport}
+              onChange={(event) => update("alternativeTransport", event.target.value)}
+              placeholder="Approved diversions and alternative transit options" />
+          </Field>
+        </section>
+      )}
 
-      </div>
+      {/* RESIDENTS: SHOWN ONLY WHEN SELECTED */}
+      {affectsResidents && (
+        <section className="space-y-4 rounded-xl border border-teal/20 bg-mint/30 p-5">
+          <h3 className="text-lg font-bold text-teal">Residential Impact Information</h3>
+          <Field label="Residential impact status">
+            <select className="field" value={form.residentStatus}
+              onChange={(event) => update("residentStatus", event.target.value)}>
+              <option>Normal</option>
+              <option>Noise Disturbance</option>
+              <option>Access Restrictions</option>
+              <option>Utility Interruption</option>
+              <option>Other Disruptions</option>
+            </select>
+          </Field>
+          <Field label="Residential impact details">
+            <textarea rows={3} maxLength={1000} className="field"
+              value={form.residentDetails}
+              onChange={(event) => update("residentDetails", event.target.value)}
+              placeholder="Noise, access, utilities or other residential impacts" />
+          </Field>
+          <Field label="Mitigation and alternative arrangements">
+            <textarea rows={3} maxLength={1000} className="field"
+              value={form.mitigationMeasures}
+              onChange={(event) => update("mitigationMeasures", event.target.value)}
+              placeholder="Measures to reduce disruption or maintain access" />
+          </Field>
+        </section>
+      )}
 
-
-      {/* ------------------------------------------ */}
       {/* FEATURED ANNOUNCEMENT */}
-      {/* ------------------------------------------ */}
-
       <label className="flex items-center gap-3 text-sm text-slate-700">
-
-        <input
-          type="checkbox"
-          className="h-4 w-4 accent-teal"
-          checked={!!form.featured}
-          onChange={(event) =>
-            update("featured", event.target.checked)
-          }
-        />
-
+        <input type="checkbox" className="h-4 w-4 accent-teal"
+          checked={Boolean(form.featured)}
+          onChange={(event) => update("featured", event.target.checked)} />
         Feature this announcement on the home page
-
       </label>
 
-
-      {/* ------------------------------------------ */}
-      {/* FORM BUTTONS */}
-      {/* ------------------------------------------ */}
-
+      {/* FORM ACTIONS */}
       <div className="flex flex-wrap justify-end gap-3 border-t border-slate-100 pt-5">
-
-        <button
-          type="button"
-          onClick={onCancel}
-          className="secondary"
-        >
+        <button type="button" onClick={onCancel} className="secondary">
           Cancel
         </button>
-
-        <button
-          type="submit"
-          disabled={invalidDate || invalidCoordinates}
-          className="primary"
-        >
+        <button type="submit" disabled={hasErrors} className="primary">
           {initial ? "Save changes" : "Publish announcement"}
         </button>
-
       </div>
-
     </form>
   );
 }

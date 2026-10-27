@@ -4,10 +4,8 @@ import React from "react";
 import {
   TrainFront,
   ArrowRight,
-  ArrowUpRight,
   Megaphone,
   MessageSquareText,
-  ClipboardList,
   MapPin,
 } from "lucide-react";
 
@@ -20,37 +18,8 @@ import {
 // Horizontal LRT station component
 import StationLine from "../components/StationLine.jsx";
 
-// Utility function
+// Utility functions
 import { formatDate } from "../lib/data.js";
-
-
-// =====================================================
-// COMMUNITY SERVICES DATA
-// =====================================================
-
-const communityServices = [
-  {
-    icon: Megaphone,
-    title: "Construction announcements",
-    description:
-      "View schedule changes, road access notices and construction information.",
-    destination: "announcements",
-  },
-  {
-    icon: MessageSquareText,
-    title: "Submit community feedback",
-    description:
-      "Report construction-related impacts in your neighbourhood.",
-    destination: "submit",
-  },
-  {
-    icon: ClipboardList,
-    title: "Track your report",
-    description:
-      "Use your reference number and email address to follow your feedback status.",
-    destination: "track",
-  },
-];
 
 
 // =====================================================
@@ -65,24 +34,77 @@ export default function Home({
   setSelectedAnnouncement,
 }) {
 
-  // ---------------------------------------------------
-  // GET THREE MOST RECENT ANNOUNCEMENTS
-  // ---------------------------------------------------
-
+  // Get the three most recent announcements
   const latestAnnouncements = [...announcements]
     .sort((a, b) => b.date.localeCompare(a.date))
     .slice(0, 3);
-
-
-  // =====================================================
-  // USER INTERFACE
-  // =====================================================
 
   return (
     <>
 
       {/* ============================================= */}
-      {/* SECTION 1: HERO / WELCOME SECTION */}
+      {/* SECTION 1: FEATURED ANNOUNCEMENT */}
+      {/* ============================================= */}
+
+      {featured && (
+        <section className="bg-[#e9f5f2] px-5 py-12 lg:px-8">
+
+          <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-6 md:flex-row md:items-center">
+
+            {/* Announcement information */}
+            <div className="flex items-start gap-4">
+
+              <div className="rounded-xl bg-teal p-3 text-white">
+                <Megaphone size={25} />
+              </div>
+
+              <div>
+
+                <p className="text-xs font-extrabold uppercase tracking-widest text-teal">
+                  Featured announcement
+                </p>
+
+                <h3 className="mt-2 text-xl font-extrabold">
+                  {featured.title}
+                </h3>
+
+                <p className="mt-2 text-sm text-slate-600">
+
+                  <MapPin
+                    size={15}
+                    className="mr-1 inline"
+                  />
+
+                  {featured.location}
+
+                  <span className="mx-2">·</span>
+
+                  {formatDate(featured.date)}
+
+                </p>
+
+              </div>
+
+            </div>
+
+            {/* View announcement button */}
+            <button
+              type="button"
+              onClick={() => setSelectedAnnouncement(featured)}
+              className="primary shrink-0"
+            >
+              View notice
+              <ArrowRight size={17} />
+            </button>
+
+          </div>
+
+        </section>
+      )}
+
+
+      {/* ============================================= */}
+      {/* SECTION 2: HERO / WELCOME SECTION */}
       {/* ============================================= */}
 
       <section className="relative overflow-hidden bg-navy text-white">
@@ -125,6 +147,7 @@ export default function Home({
               </span>
 
               <br />
+
               Your voice.
 
             </h1>
@@ -216,8 +239,7 @@ export default function Home({
 
                 <p className="mt-2 text-xs leading-5 text-slate-500">
 
-                  Community information and
-                  construction engagement
+                  Community information and construction engagement
 
                 </p>
 
@@ -298,149 +320,14 @@ export default function Home({
 
 
       {/* ============================================= */}
-      {/* SECTION 2: HORIZONTAL LRT STATION LINE */}
+      {/* SECTION 3: HORIZONTAL LRT STATION LINE */}
       {/* ============================================= */}
 
       <StationLine />
 
 
       {/* ============================================= */}
-      {/* SECTION 3: COMMUNITY SERVICES */}
-      {/* ============================================= */}
-
-      <section className="mx-auto max-w-7xl px-5 py-16 lg:px-8">
-
-        <SectionHead
-          eyebrow="Community services"
-          title="Everything you need, in one place"
-          description="Explore construction updates, communicate concerns and follow up on reports."
-        />
-
-
-        {/* Community services cards */}
-        <div className="grid gap-5 md:grid-cols-3">
-
-          {communityServices.map((service) => {
-
-            const Icon = service.icon;
-
-            return (
-              <button
-                key={service.destination}
-                type="button"
-                onClick={() => goto(service.destination)}
-                className="panel group p-7 text-left transition hover:-translate-y-1 hover:border-teal/30"
-              >
-
-                {/* Service icon */}
-                <span className="inline-flex rounded-xl bg-mint p-3 text-teal">
-                  <Icon size={26} />
-                </span>
-
-
-                {/* Service title */}
-                <h3 className="mt-5 text-lg font-extrabold">
-                  {service.title}
-                </h3>
-
-
-                {/* Service description */}
-                <p className="mt-2 min-h-[48px] text-sm leading-6 text-slate-500">
-                  {service.description}
-                </p>
-
-
-                {/* Explore link */}
-                <span className="mt-6 inline-flex items-center gap-2 text-sm font-extrabold text-teal">
-
-                  Explore
-
-                  <ArrowUpRight size={17} />
-
-                </span>
-
-              </button>
-            );
-          })}
-
-        </div>
-
-      </section>
-
-
-      {/* ============================================= */}
-      {/* SECTION 4: FEATURED ANNOUNCEMENT */}
-      {/* ============================================= */}
-
-      {featured && (
-
-        <section className="bg-[#e9f5f2] px-5 py-12 lg:px-8">
-
-          <div className="mx-auto flex max-w-7xl flex-col items-start justify-between gap-6 md:flex-row md:items-center">
-
-            {/* Announcement information */}
-            <div className="flex items-start gap-4">
-
-              <div className="rounded-xl bg-teal p-3 text-white">
-                <Megaphone size={25} />
-              </div>
-
-              <div>
-
-                <p className="text-xs font-extrabold uppercase tracking-widest text-teal">
-                  Featured announcement
-                </p>
-
-                <h3 className="mt-2 text-xl font-extrabold">
-                  {featured.title}
-                </h3>
-
-                <p className="mt-2 text-sm text-slate-600">
-
-                  <MapPin
-                    size={15}
-                    className="mr-1 inline"
-                  />
-
-                  {featured.location}
-
-                  <span className="mx-2">
-                    ·
-                  </span>
-
-                  {formatDate(featured.date)}
-
-                </p>
-
-              </div>
-
-            </div>
-
-
-            {/* View featured announcement */}
-            <button
-              type="button"
-              onClick={() =>
-                setSelectedAnnouncement(featured)
-              }
-              className="primary shrink-0"
-            >
-
-              View notice
-
-              <ArrowRight size={17} />
-
-            </button>
-
-          </div>
-
-        </section>
-
-      )}
-
-
-      {/* ============================================= */}
-      {/* SECTION 5: LATEST CONSTRUCTION ANNOUNCEMENTS */}
+      {/* SECTION 4: LATEST CONSTRUCTION ANNOUNCEMENTS */}
       {/* ============================================= */}
 
       <section className="mx-auto max-w-7xl px-5 py-16 lg:px-8">
@@ -456,11 +343,8 @@ export default function Home({
               onClick={() => goto("announcements")}
               className="secondary"
             >
-
               All announcements
-
               <ArrowRight size={16} />
-
             </button>
           }
         />

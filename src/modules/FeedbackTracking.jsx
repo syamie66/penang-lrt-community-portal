@@ -1,10 +1,200 @@
-import React, {useEffect, useMemo, useState} from 'react';
-import {TrainFront, Menu, X, ArrowRight, ArrowUpRight, Megaphone, MessageSquareText, ClipboardList, MapPin, CalendarDays, Search, SlidersHorizontal, Plus, Pencil, Trash2, Eye, Clock3, CheckCircle2, AlertTriangle, ChevronRight, ShieldCheck, LayoutDashboard, Inbox, Send, CircleHelp, Construction, Route, Users, Filter, RefreshCw, Copy, ExternalLink} from 'lucide-react';
-import {ANNOUNCEMENT_CATEGORIES, FEEDBACK_CATEGORIES, FEEDBACK_STATUSES, INITIAL_ANNOUNCEMENTS, INITIAL_FEEDBACK, readStored, formatDate, makeId, categoryStyles, statusStyles} from '../lib/data.js';
-import {CategoryPill, StatusPill, Empty, SectionHead, AnnouncementCard, Modal, AnnouncementDetails, Field, AnnouncementForm, FeedbackForm, FeedbackDetails} from '../components/Common.jsx';
+import React, { useState } from "react";
 
-export default function FeedbackTracking({trackRef, setTrackRef, trackEmail, setTrackEmail, setTrackAttempted, trackAttempted, tracked, historyEmail, setHistoryEmail, historyShown, setHistoryShown, feedback, setSelectedFeedback}){
-return (
-<section className="mx-auto max-w-4xl px-5 py-12 lg:px-8"><SectionHead eyebrow="Follow your report" title="Track community feedback" description="Enter the feedback reference and matching email address used during submission to see the current status."/><form className="panel grid gap-4 p-6 md:grid-cols-[1fr_1fr_auto] md:items-end" onSubmit={e=>{e.preventDefault();setTrackAttempted(true)}}><Field label="Tracking reference" required><input className="field" required value={trackRef} onChange={e=>{setTrackRef(e.target.value);setTrackAttempted(false)}} placeholder="FB-2026-..."/></Field><Field label="Email address" required><input className="field" required type="email" value={trackEmail} onChange={e=>{setTrackEmail(e.target.value);setTrackAttempted(false)}} placeholder="name@example.com"/></Field><button className="primary md:mb-0" type="submit"><Search size={17}/>Track report</button></form>{trackAttempted&&(tracked?<div className="panel mt-6 p-6"><div className="flex flex-wrap items-center justify-between gap-3"><div><p className="text-xs font-semibold text-slate-500">REFERENCE</p><h3 className="mt-1 font-mono font-extrabold text-teal">{tracked.id}</h3></div><StatusPill status={tracked.status}/></div><h4 className="mt-5 text-lg font-extrabold">{tracked.category}</h4><p className="mt-2 text-sm text-slate-500"><MapPin size={15} className="mr-1 inline"/>{tracked.location} · Submitted {formatDate(tracked.createdAt)}</p><div className="mt-6 grid grid-cols-4 gap-1">{FEEDBACK_STATUSES.map((s,i)=><div key={s}><div className={`h-2 rounded-full ${i<=FEEDBACK_STATUSES.indexOf(tracked.status)?'bg-teal':'bg-slate-200'}`}/><p className="mt-2 text-[10px] font-bold leading-4 text-slate-500">{s}</p></div>)}</div>{tracked.adminNote&&<p className="mt-6 rounded-xl bg-mint/60 p-4 text-sm text-slate-700"><b>Latest update:</b> {tracked.adminNote}</p>}<button className="secondary mt-6" onClick={()=>setSelectedFeedback(tracked)}>View details <Eye size={16}/></button></div>:<div role="status" className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">No matching report was found. Please double-check the reference and email address. Reports are stored only in the browser where they were submitted.</div>)}<div className="panel mt-8 p-6"><h3 className="text-lg font-extrabold">Feedback history in this browser</h3><p className="mt-2 text-sm text-slate-500">Find reports associated with an email address in this browser's local demonstration data.</p><form onSubmit={e=>{e.preventDefault();setHistoryShown(true)}} className="mt-5 flex flex-col gap-3 sm:flex-row"><input aria-label="Email address for feedback history" type="email" required className="field flex-1" placeholder="Your email address" value={historyEmail} onChange={e=>{setHistoryEmail(e.target.value);setHistoryShown(false)}}/><button type="submit" className="secondary">View history</button></form>{historyShown&&<div className="mt-5 divide-y divide-slate-100">{feedback.filter(f=>f.email.toLowerCase()===historyEmail.trim().toLowerCase()).length?feedback.filter(f=>f.email.toLowerCase()===historyEmail.trim().toLowerCase()).map(f=><button key={f.id} className="flex w-full items-center justify-between gap-3 py-4 text-left" onClick={()=>setSelectedFeedback(f)}><span><span className="block font-mono text-xs font-bold text-teal">{f.id}</span><span className="mt-1 block text-sm font-bold">{f.category} — {f.location}</span></span><StatusPill status={f.status}/></button>):<p className="py-4 text-sm text-slate-500">No locally stored reports match this email.</p>}</div>}</div><div className="mt-7 flex items-start gap-3 rounded-xl bg-mint/60 p-5 text-sm leading-6 text-slate-600"><CircleHelp size={20} className="shrink-0 text-teal"/><p><b>Demo limitation:</b> Tracking is restricted to reports saved in this browser. Reports submitted on another device are not available without a real backend.</p></div></section>
-);
+import {
+  Search,
+  Mail,
+  MapPin,
+  CalendarDays,
+  Eye,
+  ClipboardList,
+} from "lucide-react";
+
+import {
+  SectionHead,
+  StatusPill,
+} from "../components/Common.jsx";
+
+import { formatDate } from "../lib/data.js";
+
+// =====================================================
+// FEEDBACK TRACKING - EMAIL-ONLY LOOKUP
+// =====================================================
+
+function FeedbackTracking({ feedback, setSelectedFeedback }) {
+  const [email, setEmail] = useState("");
+  const [searchedEmail, setSearchedEmail] = useState("");
+  const [hasSearched, setHasSearched] = useState(false);
+
+  // Search for reports submitted using the entered email.
+  const handleSearch = (event) => {
+    event.preventDefault();
+    setSearchedEmail(email.trim().toLowerCase());
+    setHasSearched(true);
+  };
+
+  // Create a sorted copy without mutating the feedback prop.
+  const matchingFeedback = hasSearched
+    ? feedback
+        .filter(
+          (item) =>
+            item.email?.trim().toLowerCase() === searchedEmail
+        )
+        .sort((a, b) =>
+          String(b.createdAt ?? "").localeCompare(String(a.createdAt ?? ""))
+        )
+    : [];
+
+  return (
+    <section className="mx-auto w-full min-w-0 max-w-5xl px-5 py-12 lg:px-8">
+      {/* PAGE HEADING */}
+      <SectionHead
+        eyebrow="Community Feedback Tracking"
+        title="Track Your Feedback"
+        description="Enter your email address to view your submitted feedback and check its status."
+      />
+
+      {/* EMAIL SEARCH */}
+      <div className="panel min-w-0 p-6 sm:p-8">
+        <div className="mb-5 flex items-center gap-3">
+          <div className="rounded-xl bg-mint p-3 text-teal">
+            <Mail size={24} />
+          </div>
+          <div className="min-w-0">
+            <h3 className="text-lg font-extrabold">Find Your Feedback</h3>
+            <p className="mt-1 text-sm text-slate-500">
+              Search using your email address.
+            </p>
+          </div>
+        </div>
+
+        <form
+          onSubmit={handleSearch}
+          className="flex flex-col gap-4 sm:flex-row sm:items-end"
+        >
+          <div className="min-w-0 flex-1">
+            <label htmlFor="feedback-email" className="field-label">
+              Email Address
+            </label>
+            <input
+              id="feedback-email"
+              type="email"
+              required
+              autoComplete="email"
+              className="field w-full min-w-0"
+              placeholder="name@example.com"
+              value={email}
+              onChange={(event) => {
+                setEmail(event.target.value);
+                setHasSearched(false);
+              }}
+            />
+          </div>
+
+          <button type="submit" className="primary justify-center">
+            <Search size={18} />
+            View My Feedback
+          </button>
+        </form>
+      </div>
+
+      {/* MATCHING REPORTS */}
+      {hasSearched && (
+        <div className="mt-8 min-w-0">
+          <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
+            <h3 className="text-xl font-extrabold">Your Feedback History</h3>
+            <span className="rounded-full bg-mint px-4 py-2 text-xs font-bold text-teal">
+              {matchingFeedback.length} Reports
+            </span>
+          </div>
+
+          {matchingFeedback.length > 0 ? (
+            <div className="min-w-0 space-y-4">
+              {matchingFeedback.map((item) => (
+                <article
+                  key={item.id}
+                  className="panel min-w-0 max-w-full overflow-hidden p-6"
+                >
+                  {/* TRACKING REFERENCE AND STATUS */}
+                  <div className="flex min-w-0 flex-wrap items-center justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="text-xs font-bold uppercase text-slate-500">
+                        Tracking Reference
+                      </p>
+                      <p className="mt-1 break-all font-mono text-sm font-extrabold text-teal">
+                        {item.id}
+                      </p>
+                    </div>
+                    <StatusPill status={item.status} />
+                  </div>
+
+                  <h4 className="mt-5 break-words text-lg font-extrabold [overflow-wrap:anywhere]">
+                    {item.category}
+                  </h4>
+
+                  <p className="mt-3 flex min-w-0 items-start gap-2 text-sm text-slate-600">
+                    <MapPin size={17} className="shrink-0 text-teal" />
+                    <span className="min-w-0 break-words [overflow-wrap:anywhere]">
+                      {item.location}
+                    </span>
+                  </p>
+
+                  <p className="mt-3 flex items-center gap-2 text-sm text-slate-600">
+                    <CalendarDays size={17} className="shrink-0 text-teal" />
+                    <span>Submitted: {formatDate(item.createdAt)}</span>
+                  </p>
+
+                  {/* ISSUE DESCRIPTION - WRAPS LONG UNBROKEN TEXT */}
+                  <div className="mt-5 min-w-0 max-w-full rounded-xl bg-slate-50 p-4">
+                    <p className="text-xs font-bold uppercase text-slate-500">
+                      Issue Description
+                    </p>
+                    <p className="mt-2 max-w-full whitespace-pre-wrap break-words text-sm leading-6 text-slate-600 [overflow-wrap:anywhere]">
+                      {item.description}
+                    </p>
+                  </div>
+
+                  {/* ADMINISTRATOR UPDATE */}
+                  {item.adminNote && (
+                    <div className="mt-4 min-w-0 max-w-full rounded-xl bg-mint/50 p-4">
+                      <p className="text-sm font-bold text-teal">
+                        Administrator Update
+                      </p>
+                      <p className="mt-2 max-w-full whitespace-pre-wrap break-words text-sm leading-6 text-slate-600 [overflow-wrap:anywhere]">
+                        {item.adminNote}
+                      </p>
+                    </div>
+                  )}
+
+                  <button
+                    type="button"
+                    className="secondary mt-5"
+                    onClick={() => setSelectedFeedback(item)}
+                  >
+                    <Eye size={17} />
+                    View Details
+                  </button>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <div className="panel p-10 text-center">
+              <ClipboardList size={35} className="mx-auto text-slate-400" />
+              <h3 className="mt-4 text-lg font-bold">No Feedback Found</h3>
+              <p className="mt-2 text-sm text-slate-500">
+                No feedback records were found for this email address in this browser.
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
+      <p className="mt-6 text-xs text-slate-500">
+        Demonstration only: Reports are stored in this browser. Email addresses
+        are not verified. Do not use this lookup for real personal complaints
+        without authentication.
+      </p>
+    </section>
+  );
 }
+
+export default FeedbackTracking;
