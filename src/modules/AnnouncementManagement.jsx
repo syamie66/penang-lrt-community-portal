@@ -1,10 +1,348 @@
-import React, {useEffect, useMemo, useState} from 'react';
-import {TrainFront, Menu, X, ArrowRight, ArrowUpRight, Megaphone, MessageSquareText, ClipboardList, MapPin, CalendarDays, Search, SlidersHorizontal, Plus, Pencil, Trash2, Eye, Clock3, CheckCircle2, AlertTriangle, ChevronRight, ShieldCheck, LayoutDashboard, Inbox, Send, CircleHelp, Construction, Route, Users, Filter, RefreshCw, Copy, ExternalLink} from 'lucide-react';
-import {ANNOUNCEMENT_CATEGORIES, FEEDBACK_CATEGORIES, FEEDBACK_STATUSES, INITIAL_ANNOUNCEMENTS, INITIAL_FEEDBACK, readStored, formatDate, makeId, categoryStyles, statusStyles} from '../lib/data.js';
-import {CategoryPill, StatusPill, Empty, SectionHead, AnnouncementCard, Modal, AnnouncementDetails, Field, AnnouncementForm, FeedbackForm, FeedbackDetails} from '../components/Common.jsx';
 
-export default function AnnouncementManagement({setEditing, filteredAdmin, adminSearch, setAdminSearch, setSelectedAnnouncement, setDeleteTarget}){
-return (
-<section className="mx-auto max-w-7xl px-5 py-12 lg:px-8"><SectionHead eyebrow="Content management" title="Manage announcements" description="Create, edit and delete the notices shown to community members." action={<button onClick={()=>setEditing(null)} className="primary"><Plus size={18}/>New announcement</button>}/><div className="panel overflow-hidden"><div className="border-b border-slate-100 p-5"><div className="relative max-w-md"><Search size={18} className="absolute left-4 top-3.5 text-slate-400"/><input aria-label="Search managed announcements" className="field pl-11" placeholder="Search announcements..." value={adminSearch} onChange={e=>setAdminSearch(e.target.value)}/></div></div><div className="divide-y divide-slate-100">{filteredAdmin.map(a=><div key={a.id} className="flex flex-col gap-4 p-5 md:flex-row md:items-center md:justify-between"><div className="min-w-0"><div className="flex flex-wrap items-center gap-2"><CategoryPill category={a.category}/>{a.featured&&<span className="text-xs font-bold text-teal">★ Featured</span>}</div><h3 className="mt-3 font-extrabold">{a.title}</h3><p className="mt-2 text-xs text-slate-500"><MapPin size={13} className="mr-1 inline"/>{a.location} <span className="mx-2">·</span>{formatDate(a.date)}</p></div><div className="flex shrink-0 gap-2"><button aria-label={`Preview ${a.title}`} onClick={()=>setSelectedAnnouncement(a)} className="secondary px-3"><Eye size={17}/></button><button aria-label={`Edit ${a.title}`} onClick={()=>setEditing(a)} className="secondary px-3"><Pencil size={17}/></button><button aria-label={`Delete ${a.title}`} onClick={()=>setDeleteTarget(a)} className="rounded-xl border border-red-100 bg-red-50 px-3 py-2 text-red-600 hover:bg-red-100"><Trash2 size={17}/></button></div></div>)}{!filteredAdmin.length&&<p className="p-8 text-center text-sm text-slate-500">No matching announcements.</p>}</div></div></section>
-);
+import React from "react";
+
+import {
+  Search,
+  Plus,
+  Pencil,
+  Trash2,
+  Eye,
+  MapPin,
+  Megaphone,
+} from "lucide-react";
+
+// Utility functions
+import {
+  formatDate,
+} from "../lib/data.js";
+
+// Reusable components
+import {
+  CategoryPill,
+  SectionHead,
+} from "../components/Common.jsx";
+
+
+// =====================================================
+// ANNOUNCEMENT MANAGEMENT COMPONENT
+// MODULE 3: ADMINISTRATOR
+// =====================================================
+
+export default function AnnouncementManagement({
+  setEditing,
+  filteredAdmin,
+  adminSearch,
+  setAdminSearch,
+  setSelectedAnnouncement,
+  setDeleteTarget,
+}) {
+
+  // =====================================================
+  // USER INTERFACE
+  // =====================================================
+
+  return (
+    <section className="mx-auto max-w-7xl px-5 py-12 lg:px-8">
+
+      {/* ============================================= */}
+      {/* PAGE HEADING */}
+      {/* ============================================= */}
+
+      <SectionHead
+        eyebrow="Content Management"
+        title="Manage Announcements"
+        description="Create, edit and delete the notices shown to community members."
+        action={
+
+          <button
+            type="button"
+            onClick={() => setEditing(null)}
+            className="primary"
+          >
+
+            <Plus size={18} />
+
+            New Announcement
+
+          </button>
+
+        }
+      />
+
+
+      {/* ============================================= */}
+      {/* MAIN ANNOUNCEMENT PANEL */}
+      {/* ============================================= */}
+
+      <div className="panel overflow-hidden">
+
+        {/* ========================================== */}
+        {/* SEARCH SECTION */}
+        {/* ========================================== */}
+
+        <div className="border-b border-slate-100 p-5">
+
+          <div
+            className="
+              flex w-full max-w-md items-center gap-3
+              rounded-xl border border-slate-200
+              bg-white px-4
+              transition
+              focus-within:border-[#073b78]
+              focus-within:ring-2
+              focus-within:ring-blue-100
+            "
+          >
+
+            {/* Search icon */}
+            <Search
+              size={20}
+              aria-hidden="true"
+              className="shrink-0 text-slate-400"
+            />
+
+            {/* Search input */}
+            <input
+              type="search"
+              aria-label="Search managed announcements"
+              placeholder="Search announcements..."
+              value={adminSearch}
+              onChange={(event) =>
+                setAdminSearch(event.target.value)
+              }
+              className="
+                min-w-0 w-full flex-1
+                border-0 bg-transparent
+                py-3 text-sm text-navy
+                outline-none
+                placeholder:text-slate-400
+                focus:outline-none
+                focus:ring-0
+              "
+            />
+
+          </div>
+
+        </div>
+
+
+        {/* ========================================== */}
+        {/* ANNOUNCEMENT LIST */}
+        {/* ========================================== */}
+
+        <div className="divide-y divide-slate-100">
+
+          {filteredAdmin.length > 0 ? (
+
+            filteredAdmin.map((announcement) => (
+
+              <div
+                key={announcement.id}
+                className="
+                  flex flex-col gap-4 p-5
+                  transition hover:bg-[#f4f7fc]
+                  md:flex-row md:items-center
+                  md:justify-between
+                "
+              >
+
+                {/* ---------------------------------- */}
+                {/* LEFT: ANNOUNCEMENT INFORMATION */}
+                {/* ---------------------------------- */}
+
+                <div className="min-w-0 flex-1">
+
+                  {/* Category and featured label */}
+                  <div className="flex flex-wrap items-center gap-2">
+
+                    <CategoryPill
+                      category={announcement.category}
+                    />
+
+                    {announcement.featured && (
+
+                      <span className="text-xs font-bold text-[#e5092d]">
+                        ★ Featured
+                      </span>
+
+                    )}
+
+                  </div>
+
+
+                  {/* Announcement title */}
+                  <h3 className="mt-3 break-words text-base font-extrabold text-navy">
+
+                    {announcement.title}
+
+                  </h3>
+
+
+                  {/* Location and date */}
+                  <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+
+                    <MapPin
+                      size={15}
+                      className="shrink-0 text-[#e5092d]"
+                    />
+
+                    <span className="break-words">
+                      {announcement.location}
+                    </span>
+
+                    <span>·</span>
+
+                    <span>
+                      {formatDate(announcement.date)}
+                    </span>
+
+                  </div>
+
+
+                  {/* Optional description preview */}
+                  {announcement.description && (
+
+                    <p
+                      className="
+                        mt-3 line-clamp-2
+                        break-words
+                        [overflow-wrap:anywhere]
+                        text-sm leading-6 text-slate-500
+                      "
+                    >
+                      {announcement.description}
+                    </p>
+
+                  )}
+
+                </div>
+
+
+                {/* ---------------------------------- */}
+                {/* RIGHT: MANAGEMENT ACTION BUTTONS */}
+                {/* ---------------------------------- */}
+
+                <div className="flex shrink-0 items-center gap-2">
+
+                  {/* Preview announcement */}
+                  <button
+                    type="button"
+                    aria-label={`Preview ${announcement.title}`}
+                    title="Preview announcement"
+                    onClick={() =>
+                      setSelectedAnnouncement(announcement)
+                    }
+                    className="
+                      inline-flex h-10 w-10 items-center
+                      justify-center rounded-xl border
+                      border-slate-200 bg-white
+                      text-[#073b78] transition
+                      hover:border-[#073b78]
+                      hover:bg-[#e9f2fc]
+                    "
+                  >
+
+                    <Eye size={18} />
+
+                  </button>
+
+
+                  {/* Edit announcement */}
+                  <button
+                    type="button"
+                    aria-label={`Edit ${announcement.title}`}
+                    title="Edit announcement"
+                    onClick={() =>
+                      setEditing(announcement)
+                    }
+                    className="
+                      inline-flex h-10 w-10 items-center
+                      justify-center rounded-xl border
+                      border-slate-200 bg-white
+                      text-[#073b78] transition
+                      hover:border-[#073b78]
+                      hover:bg-[#e9f2fc]
+                    "
+                  >
+
+                    <Pencil size={18} />
+
+                  </button>
+
+
+                  {/* Delete announcement */}
+                  <button
+                    type="button"
+                    aria-label={`Delete ${announcement.title}`}
+                    title="Delete announcement"
+                    onClick={() =>
+                      setDeleteTarget(announcement)
+                    }
+                    className="
+                      inline-flex h-10 w-10 items-center
+                      justify-center rounded-xl border
+                      border-red-100 bg-red-50
+                      text-red-600 transition
+                      hover:border-red-300
+                      hover:bg-red-100
+                    "
+                  >
+
+                    <Trash2 size={18} />
+
+                  </button>
+
+                </div>
+
+              </div>
+
+            ))
+
+          ) : (
+
+            /* ===================================== */
+            /* EMPTY SEARCH RESULTS */
+            /* ===================================== */
+
+            <div className="px-6 py-14 text-center">
+
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-[#e9f2fc] text-[#073b78]">
+
+                <Megaphone size={28} />
+
+              </div>
+
+              <h3 className="mt-4 text-lg font-extrabold text-navy">
+                No Matching Announcements
+              </h3>
+
+              <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">
+
+                No construction announcements match
+                your current search.
+
+              </p>
+
+
+              {/* Clear search button */}
+              <button
+                type="button"
+                className="secondary mt-5"
+                onClick={() => setAdminSearch("")}
+              >
+
+                Clear Search
+
+              </button>
+
+            </div>
+
+          )}
+
+        </div>
+
+      </div>
+
+    </section>
+  );
 }

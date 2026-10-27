@@ -1,3 +1,472 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
-@tailwind base;@tailwind components;@tailwind utilities;
-:root{font-family:'DM Sans',sans-serif;color:#0b263d;background:#f5f8fa;font-synthesis:none}body{margin:0;min-width:320px}h1,h2,h3,h4{font-family:Manrope,sans-serif}button,input,textarea,select{font:inherit}button{cursor:pointer}button:disabled{cursor:not-allowed;opacity:.5}:focus-visible{outline:3px solid #42b4bd;outline-offset:3px}.field{@apply w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-navy outline-none transition focus:border-teal focus:ring-2 focus:ring-teal/10}.field-label{@apply mb-2 block text-xs font-bold uppercase tracking-wide text-slate-600}.primary{@apply inline-flex items-center justify-center gap-2 rounded-xl bg-teal px-5 py-3 text-sm font-bold text-white transition hover:bg-[#06676c]}.secondary{@apply inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-bold text-navy transition hover:border-teal hover:text-teal}.panel{@apply rounded-2xl border border-slate-100 bg-white shadow-soft}.tag{@apply inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold}.navlink{@apply rounded-xl px-3 py-2.5 text-sm font-semibold transition}.subtle-grid{background-image:linear-gradient(rgba(255,255,255,.055) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.055) 1px,transparent 1px);background-size:36px 36px}
+
+/* =====================================================
+   PENANG LRT MUTIARA LINE COMMUNITY PORTAL
+   RED, BLUE AND WHITE THEME
+   ===================================================== */
+
+
+/* =====================================================
+   1. GOOGLE FONTS
+   ===================================================== */
+
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap");
+
+
+/* =====================================================
+   2. TAILWIND CSS
+   ===================================================== */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+/* =====================================================
+   3. GLOBAL COLOR VARIABLES
+   ===================================================== */
+
+:root {
+  /* Main brand colors */
+  --lrt-red: #e5092d;
+  --lrt-red-dark: #bd0825;
+  --lrt-red-light: #fff0f3;
+
+  --lrt-blue: #073b78;
+  --lrt-blue-dark: #052b58;
+  --lrt-blue-light: #e9f2fc;
+
+  --lrt-white: #ffffff;
+
+  /* Background and text */
+  --lrt-background: #f4f7fc;
+  --lrt-text: #092b4c;
+  --lrt-muted: #64748b;
+
+  /* Borders and shadows */
+  --lrt-border: #dce5f1;
+  --lrt-shadow: 0 12px 35px rgba(7, 59, 120, 0.08);
+
+  font-family: "DM Sans", sans-serif;
+  color: var(--lrt-text);
+  background: var(--lrt-background);
+
+  font-synthesis: none;
+}
+
+
+/* =====================================================
+   4. GLOBAL ELEMENTS
+   ===================================================== */
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  background: var(--lrt-background);
+  color: var(--lrt-text);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: "Manrope", sans-serif;
+  letter-spacing: -0.025em;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+:focus-visible {
+  outline: 3px solid var(--lrt-red);
+  outline-offset: 3px;
+}
+
+::selection {
+  background: #ffd7df;
+  color: var(--lrt-blue-dark);
+}
+
+
+/* =====================================================
+   5. INPUT FIELDS
+   ===================================================== */
+
+.field {
+  @apply w-full rounded-xl border bg-white px-4 py-3 text-sm outline-none transition;
+
+  border-color: var(--lrt-border);
+  color: var(--lrt-text);
+}
+
+.field:focus {
+  border-color: var(--lrt-blue);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(7, 59, 120, 0.12);
+}
+
+.field:hover {
+  border-color: #a7bcd6;
+}
+
+.field::placeholder {
+  color: #94a3b8;
+}
+
+.field-label {
+  @apply mb-2 block text-xs font-bold uppercase tracking-wide;
+
+  color: var(--lrt-blue);
+}
+
+
+/* =====================================================
+   6. PRIMARY BUTTONS
+   ===================================================== */
+
+.primary {
+  @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-bold transition;
+
+  background: var(--lrt-red);
+  color: var(--lrt-white);
+  border: 1px solid var(--lrt-red);
+}
+
+.primary:hover:not(:disabled) {
+  background: var(--lrt-red-dark);
+  border-color: var(--lrt-red-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(229, 9, 45, 0.2);
+}
+
+.primary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+
+/* =====================================================
+   7. SECONDARY BUTTONS
+   ===================================================== */
+
+.secondary {
+  @apply inline-flex items-center justify-center gap-2 rounded-xl border bg-white px-5 py-3 text-sm font-bold transition;
+
+  color: var(--lrt-blue);
+  border-color: var(--lrt-border);
+}
+
+.secondary:hover:not(:disabled) {
+  border-color: var(--lrt-blue);
+  background: var(--lrt-blue-light);
+  color: var(--lrt-blue-dark);
+}
+
+
+/* =====================================================
+   8. PANELS AND CARDS
+   ===================================================== */
+
+.panel {
+  @apply rounded-2xl border bg-white;
+
+  border-color: var(--lrt-border);
+  box-shadow: var(--lrt-shadow);
+}
+
+.panel:hover {
+  border-color: #c8d8eb;
+}
+
+
+/* =====================================================
+   9. TAGS AND STATUS BADGES
+   ===================================================== */
+
+.tag {
+  @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold;
+}
+
+
+/* =====================================================
+   10. NAVIGATION LINKS
+   ===================================================== */
+
+.navlink {
+  @apply rounded-xl px-3 py-2.5 text-sm font-semibold transition;
+
+  color: var(--lrt-blue);
+}
+
+.navlink:hover {
+  background: var(--lrt-blue-light);
+  color: var(--lrt-red);
+}
+
+
+/* =====================================================
+   11. EXISTING CUSTOM COLOR COMPATIBILITY
+   ===================================================== */
+
+/*
+   These rules recolor your existing components
+   that still use bg-teal, text-teal, bg-navy
+   and bg-mint.
+
+   This helps the admin and public pages follow
+   the updated theme without rewriting every JSX file.
+*/
+
+.bg-teal {
+  background-color: var(--lrt-red);
+}
+
+.text-teal {
+  color: var(--lrt-red);
+}
+
+.border-teal {
+  border-color: var(--lrt-red);
+}
+
+.bg-navy {
+  background-color: var(--lrt-blue-dark);
+}
+
+.text-navy {
+  color: var(--lrt-text);
+}
+
+.bg-mint {
+  background-color: var(--lrt-blue-light);
+}
+
+.text-mint {
+  color: var(--lrt-blue);
+}
+
+
+/* =====================================================
+   12. NAVIGATION ACTIVE STATE
+   ===================================================== */
+
+nav .bg-mint {
+  background-color: var(--lrt-red-light);
+}
+
+nav .text-teal {
+  color: var(--lrt-red);
+}
+
+
+/* =====================================================
+   13. CARD INTERACTION
+   ===================================================== */
+
+.panel button {
+  transition:
+    color 0.2s ease,
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.panel button:hover:not(:disabled) {
+  color: var(--lrt-red);
+}
+
+/* Keep primary actions readable inside panels */
+
+.panel button.primary:hover:not(:disabled) {
+  color: #ffffff;
+}
+
+
+/* =====================================================
+   14. INPUT CHECKBOX AND RADIO
+   ===================================================== */
+
+input[type="checkbox"],
+input[type="radio"] {
+  accent-color: var(--lrt-red);
+}
+
+
+/* =====================================================
+   15. SCROLLBAR STYLING
+   ===================================================== */
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #edf2f8;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #a8bed7;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--lrt-blue);
+}
+
+
+/* =====================================================
+   16. DECORATIVE GRID
+   ===================================================== */
+
+.subtle-grid {
+  background-image:
+    linear-gradient(
+      rgba(255, 255, 255, 0.055) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.055) 1px,
+      transparent 1px
+    );
+
+  background-size: 36px 36px;
+}
+
+
+/* =====================================================
+   17. MAGAZINE-STYLE IMAGE EFFECTS
+   ===================================================== */
+
+.magazine-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+
+  transition: transform 0.5s ease;
+}
+
+.magazine-card {
+  overflow: hidden;
+  border-radius: 16px;
+  background: white;
+  box-shadow: var(--lrt-shadow);
+
+  transition:
+    transform 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+.magazine-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 18px 40px rgba(7, 59, 120, 0.14);
+}
+
+.magazine-card:hover .magazine-image {
+  transform: scale(1.05);
+}
+
+
+/* =====================================================
+   18. CUSTOM RED AND BLUE SECTION CLASSES
+   ===================================================== */
+
+.lrt-section-red {
+  background: var(--lrt-red);
+  color: white;
+}
+
+.lrt-section-blue {
+  background: var(--lrt-blue);
+  color: white;
+}
+
+.lrt-section-light {
+  background: var(--lrt-blue-light);
+  color: var(--lrt-text);
+}
+
+.lrt-heading-accent {
+  display: inline-block;
+  border-left: 5px solid var(--lrt-red);
+  padding-left: 16px;
+}
+
+
+/* =====================================================
+   19. FEEDBACK DESCRIPTION WORD WRAPPING
+   ===================================================== */
+
+.feedback-description {
+  max-width: 100%;
+  min-width: 0;
+
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: normal;
+
+  line-height: 1.7;
+}
+
+
+/* =====================================================
+   20. MOBILE RESPONSIVENESS
+   ===================================================== */
+
+@media (max-width: 768px) {
+
+  .primary,
+  .secondary {
+    font-size: 13px;
+  }
+
+  .panel {
+    border-radius: 14px;
+  }
+
+  .magazine-card {
+    border-radius: 14px;
+  }
+
+}
+
+
+/* =====================================================
+   21. REDUCED MOTION ACCESSIBILITY
+   ===================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+
+}

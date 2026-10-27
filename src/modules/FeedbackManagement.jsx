@@ -1,10 +1,280 @@
-import React, {useEffect, useMemo, useState} from 'react';
-import {TrainFront, Menu, X, ArrowRight, ArrowUpRight, Megaphone, MessageSquareText, ClipboardList, MapPin, CalendarDays, Search, SlidersHorizontal, Plus, Pencil, Trash2, Eye, Clock3, CheckCircle2, AlertTriangle, ChevronRight, ShieldCheck, LayoutDashboard, Inbox, Send, CircleHelp, Construction, Route, Users, Filter, RefreshCw, Copy, ExternalLink} from 'lucide-react';
-import {ANNOUNCEMENT_CATEGORIES, FEEDBACK_CATEGORIES, FEEDBACK_STATUSES, INITIAL_ANNOUNCEMENTS, INITIAL_FEEDBACK, readStored, formatDate, makeId, categoryStyles, statusStyles} from '../lib/data.js';
-import {CategoryPill, StatusPill, Empty, SectionHead, AnnouncementCard, Modal, AnnouncementDetails, Field, AnnouncementForm, FeedbackForm, FeedbackDetails} from '../components/Common.jsx';
 
-export default function FeedbackManagement({filteredFeedback, feedbackSearch, setFeedbackSearch, feedbackStatus, setFeedbackStatus, setSelectedFeedback}){
-return (
-<section className="mx-auto max-w-7xl px-5 py-12 lg:px-8"><SectionHead eyebrow="Community engagement" title="Feedback management" description="Review submitted concerns, change their status and leave visible tracking updates."/><div className="panel overflow-hidden"><div className="grid gap-4 border-b border-slate-100 p-5 sm:grid-cols-[1fr_220px]"><div className="relative"><Search size={18} className="absolute left-4 top-3.5 text-slate-400"/><input aria-label="Search submitted feedback" className="field pl-11" value={feedbackSearch} onChange={e=>setFeedbackSearch(e.target.value)} placeholder="Search reference, reporter or location..."/></div><select aria-label="Filter feedback by status" className="field" value={feedbackStatus} onChange={e=>setFeedbackStatus(e.target.value)}><option>All statuses</option>{FEEDBACK_STATUSES.map(s=><option key={s}>{s}</option>)}</select></div><div className="divide-y divide-slate-100">{filteredFeedback.map(f=><button key={f.id} onClick={()=>setSelectedFeedback(f)} className="flex w-full flex-col gap-4 p-5 text-left transition hover:bg-slate-50 sm:flex-row sm:items-center sm:justify-between"><div className="min-w-0"><p className="font-mono text-xs font-extrabold text-teal">{f.id}</p><h3 className="mt-2 font-extrabold">{f.category}</h3><p className="mt-2 text-xs text-slate-500">{f.location} · {f.name} · {formatDate(f.createdAt)}</p><p className="mt-2 line-clamp-1 text-sm text-slate-500">{f.description}</p></div><div className="flex shrink-0 items-center gap-3"><StatusPill status={f.status}/><ChevronRight size={18} className="text-slate-400"/></div></button>)}{!filteredFeedback.length&&<p className="p-8 text-center text-sm text-slate-500">No matching feedback reports.</p>}</div></div></section>
-);
+import React from "react";
+
+import {
+  Search,
+  ChevronRight,
+  Inbox,
+} from "lucide-react";
+
+// Data and utility functions
+import {
+  FEEDBACK_STATUSES,
+  formatDate,
+} from "../lib/data.js";
+
+// Shared components
+import {
+  SectionHead,
+  StatusPill,
+} from "../components/Common.jsx";
+
+
+// =====================================================
+// FEEDBACK MANAGEMENT COMPONENT
+// MODULE 4: ADMINISTRATOR
+// =====================================================
+
+export default function FeedbackManagement({
+  filteredFeedback,
+  feedbackSearch,
+  setFeedbackSearch,
+  feedbackStatus,
+  setFeedbackStatus,
+  setSelectedFeedback,
+}) {
+
+  return (
+    <section className="mx-auto max-w-7xl px-5 py-12 lg:px-8">
+
+      {/* ============================================= */}
+      {/* PAGE HEADING */}
+      {/* ============================================= */}
+
+      <SectionHead
+        eyebrow="Community Engagement"
+        title="Feedback Management"
+        description="Review submitted concerns, change their status and leave visible tracking updates."
+      />
+
+
+      {/* ============================================= */}
+      {/* MAIN FEEDBACK PANEL */}
+      {/* ============================================= */}
+
+      <div className="panel overflow-hidden">
+
+        {/* ========================================== */}
+        {/* SEARCH AND FILTER SECTION */}
+        {/* ========================================== */}
+
+        <div className="grid gap-4 border-b border-slate-100 p-5 sm:grid-cols-[minmax(0,1fr)_220px]">
+
+          {/* ---------------------------------------- */}
+          {/* SEARCH INPUT - FIXED */}
+          {/* ---------------------------------------- */}
+
+          <div
+            className="
+              flex min-w-0 items-center gap-3
+              rounded-xl border border-slate-200
+              bg-white px-4
+              transition
+              focus-within:border-[#073b78]
+              focus-within:ring-2
+              focus-within:ring-blue-100
+            "
+          >
+
+            {/* Search icon */}
+            <Search
+              size={20}
+              aria-hidden="true"
+              className="shrink-0 text-slate-400"
+            />
+
+            {/* Search input */}
+            <input
+              type="search"
+              aria-label="Search submitted feedback"
+              placeholder="Search reference, reporter or location..."
+              value={feedbackSearch}
+              onChange={(event) =>
+                setFeedbackSearch(event.target.value)
+              }
+              className="
+                min-w-0 w-full flex-1
+                border-0 bg-transparent
+                py-3 text-sm text-navy
+                outline-none
+                placeholder:text-slate-400
+                focus:outline-none
+                focus:ring-0
+              "
+            />
+
+          </div>
+
+
+          {/* ---------------------------------------- */}
+          {/* STATUS FILTER */}
+          {/* ---------------------------------------- */}
+
+          <select
+            aria-label="Filter feedback by status"
+            className="field"
+            value={feedbackStatus}
+            onChange={(event) =>
+              setFeedbackStatus(event.target.value)
+            }
+          >
+
+            <option value="All statuses">
+              All statuses
+            </option>
+
+            {FEEDBACK_STATUSES.map((status) => (
+
+              <option
+                key={status}
+                value={status}
+              >
+                {status}
+              </option>
+
+            ))}
+
+          </select>
+
+        </div>
+
+
+        {/* ========================================== */}
+        {/* FEEDBACK REPORT LIST */}
+        {/* ========================================== */}
+
+        <div className="divide-y divide-slate-100">
+
+          {filteredFeedback.length > 0 ? (
+
+            filteredFeedback.map((item) => (
+
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setSelectedFeedback(item)}
+                className="
+                  flex w-full flex-col gap-4 p-5 text-left
+                  transition hover:bg-[#f4f7fc]
+                  sm:flex-row sm:items-center
+                  sm:justify-between
+                "
+              >
+
+                {/* ---------------------------------- */}
+                {/* LEFT: FEEDBACK INFORMATION */}
+                {/* ---------------------------------- */}
+
+                <div className="min-w-0 flex-1">
+
+                  {/* Tracking reference */}
+                  <p className="break-all font-mono text-xs font-extrabold text-teal">
+                    {item.id}
+                  </p>
+
+
+                  {/* Feedback category */}
+                  <h3 className="mt-2 break-words text-base font-extrabold text-navy">
+                    {item.category}
+                  </h3>
+
+
+                  {/* Reporter, location and date */}
+                  <p className="mt-2 break-words text-xs leading-5 text-slate-500">
+
+                    {item.location}
+
+                    <span className="mx-2">·</span>
+
+                    {item.name}
+
+                    <span className="mx-2">·</span>
+
+                    {formatDate(item.createdAt)}
+
+                  </p>
+
+
+                  {/* Issue description preview */}
+                  <p
+                    className="
+                      mt-2 line-clamp-2
+                      break-words
+                      [overflow-wrap:anywhere]
+                      text-sm leading-6
+                      text-slate-500
+                    "
+                  >
+                    {item.description}
+                  </p>
+
+                </div>
+
+
+                {/* ---------------------------------- */}
+                {/* RIGHT: STATUS AND ACTION ICON */}
+                {/* ---------------------------------- */}
+
+                <div className="flex shrink-0 items-center gap-3">
+
+                  {/* Feedback status */}
+                  <StatusPill status={item.status} />
+
+                  {/* View details indicator */}
+                  <ChevronRight
+                    size={18}
+                    className="text-slate-400"
+                  />
+
+                </div>
+
+              </button>
+
+            ))
+
+          ) : (
+
+            /* ===================================== */
+            /* EMPTY SEARCH RESULTS */
+            /* ===================================== */
+
+            <div className="px-6 py-14 text-center">
+
+              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-xl bg-[#e9f2fc] text-[#073b78]">
+
+                <Inbox size={28} />
+
+              </div>
+
+              <h3 className="mt-4 text-lg font-extrabold text-navy">
+                No Matching Feedback
+              </h3>
+
+              <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">
+                No feedback reports match your current
+                search or selected status.
+              </p>
+
+              {/* Clear filters button */}
+              <button
+                type="button"
+                className="secondary mt-5"
+                onClick={() => {
+                  setFeedbackSearch("");
+                  setFeedbackStatus("All statuses");
+                }}
+              >
+                Clear Filters
+              </button>
+
+            </div>
+
+          )}
+
+        </div>
+
+      </div>
+
+    </section>
+  );
 }
