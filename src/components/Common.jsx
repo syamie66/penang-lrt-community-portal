@@ -18,6 +18,7 @@ import {
   CircleHelp,
   Footprints,
   Store,
+  ExternalLink,
 } from "lucide-react";
 
 import {
@@ -323,6 +324,16 @@ function Field({
 // MODULE 1: PUBLIC ANNOUNCEMENT DETAILS
 // =====================================================
 
+function isHttpUrl(value) {
+  if (!value || typeof value !== "string") return false;
+  try {
+    const parsed = new URL(value);
+    return parsed.protocol === "https:" || parsed.protocol === "http:";
+  } catch {
+    return false;
+  }
+}
+
 function ConstructionAccessInfo({ item }) {
   // Older sample announcements may not include affectedGroups.
   const legacy = !Array.isArray(item.affectedGroups);
@@ -352,6 +363,33 @@ function ConstructionAccessInfo({ item }) {
           </p>
         )}
       </section>
+
+      {(item.alternativeRoadDetails || item.alternativeRoadMapUrl) && (
+        <section className="rounded-xl border border-[#dce5f1] bg-[#e9f2fc]/60 p-5">
+          <div className="flex items-center gap-2">
+            <Route size={20} className="text-teal" />
+            <h3 className="font-bold">Alternative Road &amp; Access Information</h3>
+          </div>
+          {item.alternativeRoadDetails && (
+            <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-slate-600">
+              {item.alternativeRoadDetails}
+            </p>
+          )}
+          {isHttpUrl(item.alternativeRoadMapUrl) && (
+            <a
+              href={item.alternativeRoadMapUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="primary mt-4 inline-flex"
+            >
+              Open approved route in Google Maps <ExternalLink size={16} />
+            </a>
+          )}
+          <p className="mt-3 text-xs leading-5 text-slate-500">
+            Follow official road signs and instructions on site. The map link is supplied by the administrator and may not reflect live closures.
+          </p>
+        </section>
+      )}
 
       {showPedestrians && (
         <section className="rounded-xl bg-slate-50 p-5">
@@ -527,19 +565,16 @@ function AnnouncementDetails({ item, onClose }) {
       {/* Three additional construction functions */}
       <ConstructionAccessInfo item={item} />
 
-      {/* Interactive map: displays administrator-provided coordinates */}
+      {/* Construction location and generated diversion map */}
       <ConstructionMap
-        latitude={item.latitude}
-        longitude={item.longitude}
         title={item.title}
         location={item.location}
         affectedAreas={item.affectedAreas}
+        mapData={item.mapData}
+        latitude={item.latitude}
+        longitude={item.longitude}
+        affectedRoadPoints={item.affectedRoadPoints}
       />
-
-      <p className="mt-7 text-xs text-slate-400">
-        Please follow verified on-site instructions
-        for current arrangements.
-      </p>
 
     </Modal>
   );
@@ -560,10 +595,25 @@ const blankAnnouncement = {
   category: "Construction Update",
   featured: false,
 
-  // General affected location and optional map position
+  // Construction map data is generated through map clicks, not typed coordinates.
   affectedAreas: "",
+  alternativeRoadDetails: "",
+  alternativeRoadMapUrl: "",
+  mapData: {
+    sitePoint: null,
+    siteLabel: "",
+    closurePolygon: [],
+    routeStart: null,
+    routeEnd: null,
+    alternativeRoute: [],
+    routeDistance: null,
+    routeDuration: null,
+  },
+  // Legacy fields remain for announcements saved by earlier versions.
   latitude: "",
   longitude: "",
+  affectedRoadPoints: "",
+  alternativeRoutePoints: "",
 
   // One or more groups can be selected
   affectedGroups: [],
@@ -621,6 +671,10 @@ function AnnouncementForm({ initial, onSave, onCancel }) {
   const [form, setForm] = useState(() => ({
     ...blankAnnouncement,
     ...(initial || {}),
+    mapData: {
+      ...blankAnnouncement.mapData,
+      ...(initial?.mapData || {}),
+    },
     affectedGroups: Array.isArray(initial?.affectedGroups)
       ? initial.affectedGroups
       : [],
@@ -648,22 +702,12 @@ function AnnouncementForm({ initial, onSave, onCancel }) {
     form.date && form.endDate && form.endDate < form.date
   );
 
-  const latitude = String(form.latitude ?? "").trim();
-  const longitude = String(form.longitude ?? "").trim();
-  const hasLatitude = latitude !== "";
-  const hasLongitude = longitude !== "";
-
-  const invalidCoordinates =
-    hasLatitude !== hasLongitude ||
-    (hasLatitude && (
-      !Number.isFinite(Number(latitude)) ||
-      !Number.isFinite(Number(longitude)) ||
-      Number(latitude) < -90 || Number(latitude) > 90 ||
-      Number(longitude) < -180 || Number(longitude) > 180
-    ));
-
   const missingGroup = form.affectedGroups.length === 0;
-  const hasErrors = invalidDate || invalidCoordinates || missingGroup;
+  const alternativeRoadMapUrl = String(form.alternativeRoadMapUrl || "").trim();
+  const invalidAlternativeRoadMapUrl = Boolean(
+    alternativeRoadMapUrl && !isHttpUrl(alternativeRoadMapUrl)
+  );
+  const hasErrors = invalidDate || missingGroup || invalidAlternativeRoadMapUrl;
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -676,8 +720,12 @@ function AnnouncementForm({ initial, onSave, onCancel }) {
       description: form.description.trim(),
       location: form.location.trim(),
       affectedAreas: form.affectedAreas.trim(),
-      latitude,
-      longitude,
+      alternativeRoadDetails: String(form.alternativeRoadDetails || "").trim(),
+      alternativeRoadMapUrl,
+      mapData: {
+        ...blankAnnouncement.mapData,
+        ...(form.mapData || {}),
+      },
 
       pedestrianStatus: affectsPedestrians ? form.pedestrianStatus : "",
       pedestrianDetails: affectsPedestrians ? form.pedestrianDetails.trim() : "",
@@ -795,38 +843,55 @@ function AnnouncementForm({ initial, onSave, onCancel }) {
         )}
       </section>
 
-      {/* GENERAL LOCATION AND INTERACTIVE MAP */}
+      {/* CONSTRUCTION AREA AND ADMINISTRATOR-PROVIDED DIVERSION */}
       <section className="space-y-4 border-t border-slate-200 pt-6">
-        <h3 className="text-lg font-bold">Affected Locations</h3>
-        <Field label="Affected areas">
+        <div>
+          <h3 className="text-lg font-bold">Construction Area &amp; Alternative Road</h3>
+          <p className="mt-2 text-sm leading-6 text-slate-500">
+            Search for the construction location and optionally mark the affected area on the map. Enter an administrator-approved diversion description and, if available, a Google Maps directions link. This portal does not automatically calculate routes.
+          </p>
+        </div>
+
+        <Field label="Affected areas and road details">
           <textarea rows={3} maxLength={1000} className="field"
             value={form.affectedAreas}
             onChange={(event) => update("affectedAreas", event.target.value)}
-            placeholder="Affected roads, neighbourhoods or landmarks" />
+            placeholder="Affected road, nearby junctions, landmarks or neighbourhoods" />
         </Field>
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Latitude (optional)">
-            <input type="number" step="any" min="-90" max="90" className="field"
-              value={form.latitude ?? ""}
-              onChange={(event) => update("latitude", event.target.value)}
-              placeholder="Latitude" />
-          </Field>
-          <Field label="Longitude (optional)">
-            <input type="number" step="any" min="-180" max="180" className="field"
-              value={form.longitude ?? ""}
-              onChange={(event) => update("longitude", event.target.value)}
-              placeholder="Longitude" />
-          </Field>
-        </div>
-        <p className="text-xs text-slate-500">
-          Use verified construction site coordinates only. Leave both blank if unknown.
+        <Field label="Approved alternative road or access instructions">
+          <textarea rows={4} maxLength={2000} className="field"
+            value={form.alternativeRoadDetails}
+            onChange={(event) => update("alternativeRoadDetails", event.target.value)}
+            placeholder="Describe the approved diversion, road names, pedestrian access, business entrance or other instructions." />
+        </Field>
+
+        <Field label="Google Maps directions link (optional)">
+          <input type="url" maxLength={1000} className="field"
+            value={form.alternativeRoadMapUrl}
+            onChange={(event) => update("alternativeRoadMapUrl", event.target.value)}
+            placeholder="https://www.google.com/maps/dir/..." />
+        </Field>
+        <p className="-mt-2 text-xs leading-5 text-slate-500">
+          Use a verified link prepared by the project team. Google Maps may suggest a different route and may not account for temporary road closures.
         </p>
-        {invalidCoordinates && (
+        {invalidAlternativeRoadMapUrl && (
           <p className="text-sm text-red-600" role="alert">
-            Enter both valid coordinates, or leave both blank.
+            Enter a valid HTTP or HTTPS link, or leave this field blank.
           </p>
         )}
+
+        <ConstructionMap
+          editable
+          title={form.title}
+          location={form.location}
+          affectedAreas={form.affectedAreas}
+          mapData={form.mapData}
+          onChange={(nextMapData) => update("mapData", nextMapData)}
+          latitude={form.latitude}
+          longitude={form.longitude}
+          affectedRoadPoints={form.affectedRoadPoints}
+        />
       </section>
 
       {/* PEDESTRIANS: SHOWN ONLY WHEN SELECTED */}

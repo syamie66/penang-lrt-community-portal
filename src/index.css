@@ -470,3 +470,51 @@ input[type="radio"] {
   }
 
 }
+
+
+/* =====================================================
+   TOP CONSTRUCTION NOTICE — same compact style as old
+   demonstration strip, now with an actionable notice.
+   ===================================================== */
+.lrt-top-notice {
+  background: var(--lrt-blue-dark);
+  color: #ffffff;
+  padding: 12px 20px;
+  min-height: 46px;
+}
+.lrt-top-notice-inner {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  max-width: 1280px;
+  margin: 0 auto;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.45;
+}
+.lrt-top-notice-dot {
+  width: 7px;
+  height: 7px;
+  flex: 0 0 7px;
+  background: #f6ac40;
+  border-radius: 50%;
+}
+.lrt-top-notice-text { overflow-wrap: anywhere; }
+.lrt-top-notice-link {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: #ffffff;
+  font-size: inherit;
+  font-weight: 800;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  white-space: nowrap;
+}
+.lrt-top-notice-link:hover { color: #ffb6c3; }
+@media (max-width: 480px) {
+  .lrt-top-notice-inner { font-size: 11px; }
+}

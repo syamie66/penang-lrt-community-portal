@@ -188,11 +188,6 @@ function FeedbackTracking({ feedback, setSelectedFeedback }) {
         </div>
       )}
 
-      <p className="mt-6 text-xs text-slate-500">
-        Demonstration only: Reports are stored in this browser. Email addresses
-        are not verified. Do not use this lookup for real personal complaints
-        without authentication.
-      </p>
     </section>
   );
 }

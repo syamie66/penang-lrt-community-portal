@@ -470,6 +470,13 @@ function App() {
     [...announcements]
       .sort((a, b) => b.date.localeCompare(a.date))[0];
 
+  // Prefer an actual road/walking-route notice for the top strip.
+  const topNotice = announcements.find((item) =>
+    /alternative.*(road|walking|route)|road.*diversion|walking.*route/i.test(
+      `${item.title} ${item.category}`
+    )
+  ) || featured;
+
   // =====================================================
   // 12. NAVIGATION MENU
   // =====================================================
@@ -506,17 +513,32 @@ function App() {
     <div className="min-h-screen bg-[#f6f9fa] text-navy">
 
       {/* ============================================= */}
-      {/* DEMONSTRATION NOTICE */}
+      {/* TOP NOTICE BAR (replaces demonstration strip) */}
       {/* ============================================= */}
 
-      <div className="bg-navy px-4 py-2 text-center text-[11px] font-semibold tracking-wide text-white/85">
-
-        <span className="mr-2 inline-block h-1.5 w-1.5 rounded-full bg-amber" />
-
-        DEMONSTRATION PORTAL — Sample construction
-        information, not an official source
-
-      </div>
+      {!admin && (
+        <div className="lrt-top-notice" role="region" aria-label="Construction notice">
+          <div className="lrt-top-notice-inner">
+            <span className="lrt-top-notice-dot" aria-hidden="true" />
+            <span className="lrt-top-notice-text">
+              {topNotice ? "Alternative Road & Walking Route Information" : "View Construction Announcements"}
+            </span>
+            <button
+              type="button"
+              className="lrt-top-notice-link"
+              onClick={() => {
+                if (topNotice) {
+                  setSelectedAnnouncement(topNotice);
+                } else {
+                  goto("announcements");
+                }
+              }}
+            >
+              View Notice <span aria-hidden="true">→</span>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* ============================================= */}
       {/* HEADER AND NAVIGATION */}
@@ -833,13 +855,6 @@ function App() {
               </div>
 
             </div>
-
-            <p className="mt-5 max-w-md text-sm leading-7 text-slate-400">
-              A frontend demonstration for sharing
-              construction information and gathering
-              community feedback. Not affiliated with
-              or endorsed by official project authorities.
-            </p>
 
           </div>
 
